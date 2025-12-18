@@ -291,101 +291,82 @@
     </div>
 
     <!-- Details View Modal -->
-    <div id="detailsModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[70] flex items-center justify-center p-4 md:p-10 transition-all duration-300 opacity-0">
-        <div id="detailsCard" class="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden transform scale-95 transition-all duration-300">
-            <div class="relative p-8 md:p-12">
-                <button onclick="closeDetailsModal()" class="absolute top-6 right-6 md:top-10 md:right-10 h-10 w-10 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-full flex items-center justify-center transition-all">
-                    <i data-lucide="x" size="20"></i>
-                </button>
+    <div id="detailsModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[70] flex items-center justify-center p-4 md:p-6 transition-all duration-300 opacity-0">
+    <div id="detailsCard" class="bg-white w-full max-w-5xl rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-all duration-300">
+        <div class="relative p-6 md:p-10">
+            <button onclick="closeDetailsModal()" class="absolute top-4 right-4 h-10 w-10 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-full flex items-center justify-center z-10">
+                <i data-lucide="x" size="20"></i>
+            </button>
 
-                <div class="flex flex-col md:flex-row gap-12">
-                    <!-- Left: Metadata -->
-                    <div class="flex-1 space-y-8">
-                        <div>
-                            <h2 id="det-project" class="text-4xl font-black text-slate-900 tracking-tight leading-none mb-1">---</h2>
-                            <p class="text-indigo-600 font-bold tracking-widest text-sm uppercase">Block <span id="det-blockId">---</span></p>
-                        </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <div class="lg:col-span-7 space-y-6">
+                    <div>
+                        <h2 id="det-project" class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight break-words mb-1">---</h2>
+                        <p class="text-indigo-600 font-bold tracking-widest text-xs uppercase">Block <span id="det-blockId">---</span></p>
+                    </div>
 
-                        <div class="space-y-6">
-                            <div class="flex items-start gap-4">
-                                <div class="h-12 w-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
-                                    <i data-lucide="user" size="20"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Technician / ID</p>
-                                    <p id="det-tech" class="text-lg font-bold text-slate-800">---</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start gap-4">
-                                <div class="h-12 w-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shrink-0">
-                                    <i data-lucide="users-2" size="20"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Team / Shift</p>
-                                    <p id="det-team" class="text-lg font-bold text-slate-800">---</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start gap-4">
-                                <div class="h-12 w-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center shrink-0">
-                                    <i data-lucide="search" size="20"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider">RQA Auditor ID</p>
-                                    <p id="det-rqa" class="text-lg font-bold text-slate-800">---</p>
-                                </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-start gap-3">
+                            <div class="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="user" size="18"></i></div>
+                            <div>
+                                <p class="text-[9px] font-black uppercase text-slate-400">Technician</p>
+                                <p id="det-tech" class="text-sm font-bold text-slate-800">---</p>
                             </div>
                         </div>
-
-                        <div class="pt-4 border-t border-slate-100 flex flex-wrap gap-3">
-                            <div class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-                                <p class="text-[8px] font-black uppercase text-slate-400">Category</p>
-                                <p id="det-cat" class="text-sm font-black text-slate-700">---</p>
-                            </div>
-                            <div class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-                                <p class="text-[8px] font-black uppercase text-slate-400">UID</p>
-                                <p id="det-uid" class="text-sm font-black text-slate-700">---</p>
-                            </div>
-                            <div class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
-                                <p class="text-[8px] font-black uppercase text-slate-400">Type</p>
-                                <p id="det-type" class="text-sm font-black text-slate-700">---</p>
+                        <div class="flex items-start gap-3">
+                            <div class="h-10 w-10 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="users-2" size="18"></i></div>
+                            <div>
+                                <p class="text-[9px] font-black uppercase text-slate-400">Team</p>
+                                <p id="det-team" class="text-sm font-bold text-slate-800">---</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right: Reason / Status -->
-                    <div class="flex-1 bg-slate-50 rounded-[2rem] p-8 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-6">
-                                <h4 class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Reason for Dispute</h4>
-                                <span id="det-status" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700">Pending</span>
-                            </div>
-                            <div class="relative">
-                                <i data-lucide="quote" class="absolute -top-4 -left-4 text-slate-200" size="40"></i>
-                                <p id="det-reason" class="relative text-slate-600 text-lg leading-relaxed font-medium">---</p>
-                            </div>
+                    <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-100">
+                        <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+                            <p class="text-[8px] font-black uppercase text-slate-400">RQA ID</p>
+                            <p id="det-rqa" class="text-xs font-bold text-slate-700">---</p>
                         </div>
-                        
-                        <div class="mt-12">
-                            <div class="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <div class="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-black">
-                                        <span id="det-score">---</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-[9px] font-black uppercase text-slate-400">Partial Score</p>
-                                        <p class="text-xs font-bold text-slate-500">Points Awarded</p>
-                                    </div>
-                                </div>
-                                <i data-lucide="award" class="text-emerald-200" size="24"></i>
-                            </div>
+                        <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+                            <p class="text-[8px] font-black uppercase text-slate-400">Category</p>
+                            <p id="det-cat" class="text-xs font-bold text-slate-700">---</p>
+                        </div>
+                        <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg max-w-[150px]">
+                            <p class="text-[8px] font-black uppercase text-slate-400">UID</p>
+                            <p id="det-uid" class="text-xs font-bold text-slate-700 truncate">---</p>
+                        </div>
+                        <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+                            <p class="text-[8px] font-black uppercase text-slate-400">Type</p>
+                            <p id="det-type" class="text-xs font-bold text-slate-700">---</p>
                         </div>
                     </div>
                 </div>
+
+                <div class="lg:col-span-5 bg-slate-50 rounded-2xl p-6 flex flex-col justify-between min-h-[250px]">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Dispute Reason</h4>
+                            <span id="det-status" class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-100 text-amber-700">Pending</span>
+                        </div>
+                        <p id="det-reason" class="text-slate-600 text-sm leading-relaxed italic">---</p>
+                    </div>
+                    
+                    <div class="mt-6 p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="h-8 w-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center font-black text-xs">
+                                <span id="det-score">---</span>
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-500">Partial Score</p>
+                        </div>
+                        <i data-lucide="award" class="text-emerald-200" size="20"></i>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
+</div>
 
     <!-- PIN Modal -->
     <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] flex items-center justify-center p-4 fade-in">
