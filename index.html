@@ -22,7 +22,7 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex">
+<body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex font-sans">
 
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 flex flex-col">
@@ -31,7 +31,7 @@
                 <i data-lucide="shield-alert" class="text-indigo-400"></i>
                 <span>Dispute<span class="text-indigo-400">Mgr</span></span>
             </div>
-            <button id="closeSidebarBtn" class="md:hidden text-slate-400 hover:text-white">
+            <button id="closeSidebarBtn" onclick="toggleSidebar(false)" class="md:hidden text-slate-400 hover:text-white">
                 <i data-lucide="x"></i>
             </button>
         </div>
@@ -98,7 +98,6 @@
                                     <th class="px-6 py-5">Technician / Team</th>
                                     <th class="px-6 py-5">RQA ID</th>
                                     <th class="px-6 py-5">Status</th>
-                                    <th class="px-6 py-5">Info</th>
                                     <th class="px-6 py-5 text-right admin-only hidden">Actions</th>
                                 </tr>
                             </thead>
@@ -273,7 +272,106 @@
         </main>
     </div>
 
-    <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 fade-in">
+    <!-- Details View Modal (Photo Style) -->
+    <div id="detailsModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[70] flex items-center justify-center p-4 md:p-10 transition-all duration-300 opacity-0">
+        <div id="detailsCard" class="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden transform scale-95 transition-all duration-300">
+            <div class="relative p-8 md:p-12">
+                <!-- Close Button -->
+                <button onclick="closeDetailsModal()" class="absolute top-6 right-6 md:top-10 md:right-10 h-10 w-10 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-full flex items-center justify-center transition-all">
+                    <i data-lucide="x" size="20"></i>
+                </button>
+
+                <div class="flex flex-col md:flex-row gap-12">
+                    <!-- Left: Metadata -->
+                    <div class="flex-1 space-y-8">
+                        <div>
+                            <h2 id="det-project" class="text-4xl font-black text-slate-900 tracking-tight leading-none mb-1">---</h2>
+                            <p class="text-indigo-600 font-bold tracking-widest text-sm uppercase">Block <span id="det-blockId">---</span></p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="flex items-start gap-4">
+                                <div class="h-12 w-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="user" size="20"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Technician / ID</p>
+                                    <p id="det-tech" class="text-lg font-bold text-slate-800">---</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="h-12 w-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="users-2" size="20"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Team / Shift</p>
+                                    <p id="det-team" class="text-lg font-bold text-slate-800">---</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4">
+                                <div class="h-12 w-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="search" size="20"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider">RQA Auditor ID</p>
+                                    <p id="det-rqa" class="text-lg font-bold text-slate-800">---</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100 flex flex-wrap gap-3">
+                            <div class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                                <p class="text-[8px] font-black uppercase text-slate-400">Category</p>
+                                <p id="det-cat" class="text-sm font-black text-slate-700">---</p>
+                            </div>
+                            <div class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                                <p class="text-[8px] font-black uppercase text-slate-400">UID</p>
+                                <p id="det-uid" class="text-sm font-black text-slate-700">---</p>
+                            </div>
+                            <div class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                                <p class="text-[8px] font-black uppercase text-slate-400">Type</p>
+                                <p id="det-type" class="text-sm font-black text-slate-700">---</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Reason / Status -->
+                    <div class="flex-1 bg-slate-50 rounded-[2rem] p-8 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-6">
+                                <h4 class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Reason for Dispute</h4>
+                                <span id="det-status" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700">Pending</span>
+                            </div>
+                            <div class="relative">
+                                <i data-lucide="quote" class="absolute -top-4 -left-4 text-slate-200" size="40"></i>
+                                <p id="det-reason" class="relative text-slate-600 text-lg leading-relaxed font-medium">---</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-12">
+                            <div class="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-black">
+                                        <span id="det-score">---</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-[9px] font-black uppercase text-slate-400">Partial Score</p>
+                                        <p class="text-xs font-bold text-slate-500">Points Awarded</p>
+                                    </div>
+                                </div>
+                                <i data-lucide="award" class="text-emerald-200" size="24"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIN Modal -->
+    <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] flex items-center justify-center p-4 fade-in">
         <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-sm text-center">
             <h3 class="text-xl font-bold mb-2">Restricted Area</h3>
             <p class="text-slate-500 text-sm mb-6">Enter Admin PIN</p>
@@ -465,6 +563,46 @@
             rqaSel.innerHTML = '<option value="">Select RQA</option>' + systemSettings.rqaTechs.map(t => `<option value="${escapeHtml(t.rqaId)}">${escapeHtml(t.rqaId)}</option>`).join('');
         }
 
+        window.openDetails = (id) => {
+            const item = disputesData.find(d => d.id === id);
+            if (!item) return;
+
+            document.getElementById('det-project').innerText = item.project;
+            document.getElementById('det-blockId').innerText = item.blockId;
+            document.getElementById('det-tech').innerText = `${item.techName} (${item.techId})`;
+            document.getElementById('det-team').innerText = item.team;
+            document.getElementById('det-rqa').innerText = item.rqaTechId;
+            document.getElementById('det-cat').innerText = item.category;
+            document.getElementById('det-uid').innerText = item.fpUid;
+            document.getElementById('det-type').innerText = item.type;
+            document.getElementById('det-reason').innerText = item.reason;
+            document.getElementById('det-score').innerText = item.partial;
+            
+            const statusEl = document.getElementById('det-status');
+            statusEl.innerText = item.status;
+            let statusClass = item.status === 'Resolved' ? "bg-emerald-100 text-emerald-700" : (item.status === 'Rejected' ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700");
+            statusEl.className = `px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${statusClass}`;
+
+            const modal = document.getElementById('detailsModal');
+            const card = document.getElementById('detailsCard');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }, 10);
+            lucide.createIcons();
+        };
+
+        window.closeDetailsModal = () => {
+            const modal = document.getElementById('detailsModal');
+            const card = document.getElementById('detailsCard');
+            modal.classList.remove('opacity-100');
+            card.classList.add('scale-95');
+            card.classList.remove('scale-100');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
         function renderMainTable() {
             const body = document.getElementById('disputesTableBody');
             const noData = document.getElementById('no-data');
@@ -495,14 +633,11 @@
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusColor}">${escapeHtml(item.status)}</span>
                         </td>
-                        <td class="px-6 py-4 text-xs">
-                            <div class="font-bold text-slate-400 mb-1">CAT ${item.category} • UID: ${item.fpUid}</div>
-                            <div class="text-slate-600 max-w-xs truncate">${escapeHtml(item.reason)}</div>
-                        </td>
                         <td class="px-6 py-4 text-right admin-only ${window.isAdmin ? '' : 'hidden'}">
                             <div class="flex justify-end gap-1">
-                                <button onclick="updateStatus('${item.id}', 'Resolved')" class="h-8 w-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg"><i data-lucide="check" size="14"></i></button>
-                                <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 rounded-lg"><i data-lucide="trash-2" size="14"></i></button>
+                                <button onclick="openDetails('${item.id}')" class="h-8 w-8 flex items-center justify-center text-indigo-600 hover:bg-indigo-50 rounded-lg" title="View Details"><i data-lucide="eye" size="14"></i></button>
+                                <button onclick="updateStatus('${item.id}', 'Resolved')" class="h-8 w-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg" title="Mark Resolved"><i data-lucide="check" size="14"></i></button>
+                                <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 rounded-lg" title="Delete"><i data-lucide="trash-2" size="14"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -511,7 +646,7 @@
             lucide.createIcons();
         }
 
-        function renderSettingsProjects() {
+        window.renderSettingsProjects = () => {
             document.getElementById('project-list').innerHTML = systemSettings.projects.map(p => `
                 <div class="p-3 flex justify-between items-center group">
                     <span class="text-sm font-semibold">${p.name} (Block: ${p.blockId})</span>
@@ -520,7 +655,7 @@
             lucide.createIcons();
         }
 
-        function renderSettingsTechs() {
+        window.renderSettingsTechs = () => {
             document.getElementById('tech-list').innerHTML = systemSettings.techs.map(t => `
                 <div class="p-2 bg-slate-50 border rounded-lg flex justify-between items-center">
                     <span class="text-xs font-bold">${t.techId} - ${t.techName}</span>
@@ -529,7 +664,7 @@
             lucide.createIcons();
         }
 
-        function renderSettingsTeams() {
+        window.renderSettingsTeams = () => {
             document.getElementById('team-list').innerHTML = systemSettings.teams.map(t => `
                 <div class="flex items-center gap-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full border border-purple-100 text-xs font-black uppercase">
                     ${t.name}
@@ -538,7 +673,7 @@
             lucide.createIcons();
         }
 
-        function renderSettingsRqaTechs() {
+        window.renderSettingsRqaTechs = () => {
             document.getElementById('rqa-list').innerHTML = systemSettings.rqaTechs.map(t => `
                 <div class="flex items-center gap-2 px-3 py-1.5 bg-orange-50 text-orange-700 rounded-full border border-orange-100 text-xs font-black uppercase">
                     ${t.rqaId}
@@ -570,6 +705,7 @@
                 document.getElementById('adminBadge').classList.add('hidden');
                 document.getElementById('nav-settings').classList.add('hidden');
                 adminItems.forEach(el => el.classList.add('hidden'));
+                closeDetailsModal(); // Close if open to prevent access
             }
             renderMainTable();
         }
