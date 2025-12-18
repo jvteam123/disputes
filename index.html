@@ -96,8 +96,8 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-semibold">
-                                    <th class="px-6 py-4">Block / Tech</th>
-                                    <th class="px-6 py-4">Project & Category</th>
+                                    <th class="px-6 py-4">Project / Block</th>
+                                    <th class="px-6 py-4">Technician</th>
                                     <th class="px-6 py-4">Status</th>
                                     <th class="px-6 py-4">Reason</th>
                                     <th class="px-6 py-4 text-right admin-only hidden">Actions</th>
@@ -123,9 +123,15 @@
                 <form id="createForm" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="mb-4">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Project Name <span class="text-red-500">*</span></label>
+                            <select name="project" id="create-project" required onchange="handleProjectChange(this.value)" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                                <option value="">Select Project</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-slate-700 mb-1">Block ID <span class="text-red-500">*</span></label>
-                            <select name="blockId" id="create-blockId" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                                <option value="">Select Block</option>
+                            <select name="blockId" id="create-blockId" required disabled class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:opacity-50">
+                                <option value="">Select Project First</option>
                             </select>
                         </div>
                         <div class="mb-4">
@@ -135,12 +141,6 @@
                             </select>
                             <input type="hidden" name="techId">
                             <input type="hidden" name="techName">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Project Name <span class="text-red-500">*</span></label>
-                            <select name="project" id="create-project" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                                <option value="">Select Project</option>
-                            </select>
                         </div>
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-slate-700 mb-1">Category <span class="text-red-500">*</span></label>
@@ -195,43 +195,39 @@
             <div id="view-settings" class="hidden fade-in max-w-6xl mx-auto">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-slate-800">Admin Settings</h2>
-                    <p class="text-slate-500">Manage data structures for dropdown options.</p>
+                    <p class="text-slate-500">Manage linked projects and block IDs.</p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     
-                    <!-- LEFT COLUMN: Project & Block Group -->
+                    <!-- LEFT COLUMN: Linked Projects & Blocks -->
                     <div class="space-y-8">
-                        <!-- Project Management -->
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="font-bold flex items-center gap-2 text-slate-700"><i data-lucide="layers" size="18"></i> Projects</h3>
-                                <span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded uppercase font-bold tracking-wider">Hierarchy Level 1</span>
-                            </div>
-                            <div class="flex gap-2 mb-4">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-t-4 border-t-indigo-600">
+                            <h3 class="font-bold mb-4 flex items-center gap-2 text-slate-700"><i data-lucide="layers" size="18"></i> Step 1: Projects</h3>
+                            <div class="flex gap-2 mb-6">
                                 <input type="text" id="new-project-input" placeholder="Project Name" class="flex-1 px-3 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
                                 <button onclick="saveSetting('projects', 'new-project-input')" class="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700"><i data-lucide="plus" size="18"></i></button>
                             </div>
-                            <ul id="list-projects" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm max-h-60 overflow-y-auto no-scrollbar"></ul>
-                        </div>
+                            <ul id="list-projects" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm max-h-40 overflow-y-auto no-scrollbar mb-8"></ul>
 
-                        <!-- Block ID Management -->
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-t-4 border-t-indigo-500">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="font-bold flex items-center gap-2 text-slate-700"><i data-lucide="box" size="18"></i> Block IDs</h3>
-                                <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase font-bold tracking-wider">Hierarchy Level 2</span>
+                            <div class="border-t border-slate-100 pt-6">
+                                <h3 class="font-bold mb-4 flex items-center gap-2 text-slate-700"><i data-lucide="box" size="18"></i> Step 2: Assign Blocks to Project</h3>
+                                <div class="space-y-2 mb-4">
+                                    <select id="link-block-project" class="w-full px-3 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
+                                        <option value="">Select Project</option>
+                                    </select>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="new-block-input" placeholder="Block ID (e.g. BLK-01)" class="flex-1 px-3 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
+                                        <button onclick="saveLinkedBlock()" class="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700"><i data-lucide="plus" size="18"></i></button>
+                                    </div>
+                                </div>
+                                <ul id="list-blocks" class="space-y-2 text-sm max-h-60 overflow-y-auto no-scrollbar"></ul>
                             </div>
-                            <div class="flex gap-2 mb-4">
-                                <input type="text" id="new-block-input" placeholder="e.g. BLK-001" class="flex-1 px-3 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
-                                <button onclick="saveSetting('blocks', 'new-block-input')" class="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700"><i data-lucide="plus" size="18"></i></button>
-                            </div>
-                            <ul id="list-blocks" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm max-h-60 overflow-y-auto no-scrollbar"></ul>
                         </div>
                     </div>
 
-                    <!-- RIGHT COLUMN: Personnel Group -->
+                    <!-- RIGHT COLUMN: Personnel -->
                     <div class="space-y-8">
-                        <!-- Tech Management -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                             <h3 class="font-bold mb-4 flex items-center gap-2 text-slate-700"><i data-lucide="users" size="18"></i> Technicians</h3>
                             <div class="grid grid-cols-2 gap-2 mb-4">
@@ -244,7 +240,6 @@
                             <ul id="list-techs" class="space-y-2 text-sm max-h-60 overflow-y-auto no-scrollbar"></ul>
                         </div>
 
-                        <!-- RQA Tech Management -->
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                             <h3 class="font-bold mb-4 flex items-center gap-2 text-slate-700"><i data-lucide="shield-check" size="18"></i> RQA Tech IDs</h3>
                             <div class="flex gap-2 mb-4">
@@ -254,7 +249,6 @@
                             <ul id="list-rqa" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm max-h-40 overflow-y-auto no-scrollbar"></ul>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -276,10 +270,9 @@
     <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAzcrNsEZKka6SBEC-plnydGJKTaiR9Sk0",
             authDomain: "dispute-216ae.firebaseapp.com",
@@ -289,153 +282,168 @@
             appId: "1:1075809303666:web:e991c931f78e1e274916eb"
         };
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'dispute-app-v1';
-        const initialToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null;
         let disputesData = [];
         let systemSettings = { projects: [], blocks: [], techs: [], rqa: [] };
         window.isAdmin = false;
         const ADMIN_PIN = "1234";
 
-        // Global Actions
-        window.saveSetting = async (collectionName, inputId) => {
-            if (!auth.currentUser) return;
-            const input = document.getElementById(inputId);
-            const val = input.value.trim();
-            if(!val) return;
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', collectionName), { name: val });
-                input.value = '';
-            } catch(e) { console.error(e); }
-        };
-
-        window.saveTech = async () => {
-            if (!auth.currentUser) return;
-            const idInput = document.getElementById('new-tech-id');
-            const nameInput = document.getElementById('new-tech-name');
-            const id = idInput.value.trim();
-            const name = nameInput.value.trim();
-            if(!id || !name) return;
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'techs'), { techId: id, techName: name });
-                idInput.value = '';
-                nameInput.value = '';
-            } catch(e) { console.error(e); }
-        };
-
-        window.removeSetting = async (collectionName, docId) => {
-            if (!auth.currentUser) return;
-            if(!confirm("Remove this option?")) return;
-            try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', collectionName, docId));
-            } catch(e) { console.error(e); }
-        };
-
-        // Auth initialization
-        const initAuth = async () => {
-            try {
-                if (initialToken) {
-                    try {
-                        await signInWithCustomToken(auth, initialToken);
-                    } catch (tokenErr) {
-                        await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                try { await signInAnonymously(auth); } catch(e) {}
-            }
-        };
-
-        initAuth();
+        // Auth Logic
+        signInAnonymously(auth).catch(e => console.error("Auth Error", e));
 
         onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                startListeners();
-            }
+            if (user) startListeners();
         });
 
         function startListeners() {
-            if (!auth.currentUser) return;
-
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'disputes'), (snap) => {
                 disputesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 disputesData.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
                 renderTable();
                 document.getElementById('loading').classList.add('hidden');
-            }, (error) => console.error(error));
+            });
 
             ['projects', 'blocks', 'techs', 'rqa'].forEach(key => {
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', key), (snap) => {
                     systemSettings[key] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     renderSettings();
                     updateSpinners();
-                }, (error) => console.error(error));
+                });
             });
         }
 
-        function renderSettings() {
-            const keys = ['projects', 'blocks', 'rqa'];
-            keys.forEach(key => {
-                const list = document.getElementById(`list-${key}`);
-                if (!list) return;
-                list.innerHTML = systemSettings[key].map(item => `
-                    <li class="group flex justify-between items-center px-3 py-2 bg-slate-50 rounded-lg border border-slate-200 text-slate-700 hover:border-indigo-200 transition-colors">
-                        <span class="truncate pr-2 font-medium">${escapeHtml(item.name)}</span>
-                        <button onclick="removeSetting('${key}', '${item.id}')" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all shrink-0">
-                            <i data-lucide="trash-2" size="14"></i>
-                        </button>
-                    </li>
-                `).join('');
-            });
+        // Global Helper: Save General Setting
+        window.saveSetting = async (col, inputId) => {
+            const el = document.getElementById(inputId);
+            const val = el.value.trim();
+            if(!val) return;
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', col), { name: val });
+            el.value = '';
+        };
 
-            const techList = document.getElementById('list-techs');
-            if (techList) {
-                techList.innerHTML = systemSettings.techs.map(item => `
-                    <li class="group flex justify-between items-center px-3 py-2 bg-slate-50 rounded-lg border border-slate-200 text-slate-700 hover:border-indigo-200 transition-colors">
-                        <div class="truncate pr-2">
-                            <span class="font-bold text-indigo-600">${escapeHtml(item.techId)}</span>
-                            <span class="text-slate-500"> — ${escapeHtml(item.techName)}</span>
-                        </div>
-                        <button onclick="removeSetting('techs', '${item.id}')" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all shrink-0">
-                            <i data-lucide="trash-2" size="14"></i>
-                        </button>
-                    </li>
-                `).join('');
-            }
+        // Linked Logic: Save Block assigned to Project
+        window.saveLinkedBlock = async () => {
+            const proj = document.getElementById('link-block-project').value;
+            const block = document.getElementById('new-block-input').value.trim();
+            if(!proj || !block) return;
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'blocks'), { 
+                name: block, 
+                projectId: proj 
+            });
+            document.getElementById('new-block-input').value = '';
+        };
+
+        window.saveTech = async () => {
+            const id = document.getElementById('new-tech-id').value.trim();
+            const name = document.getElementById('new-tech-name').value.trim();
+            if(!id || !name) return;
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'techs'), { techId: id, techName: name });
+            document.getElementById('new-tech-id').value = '';
+            document.getElementById('new-tech-name').value = '';
+        };
+
+        window.removeSetting = async (col, docId) => {
+            if(confirm("Confirm removal?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, docId));
+        };
+
+        function renderSettings() {
+            // Projects list
+            const pList = document.getElementById('list-projects');
+            pList.innerHTML = systemSettings.projects.map(p => `
+                <li class="group flex justify-between items-center px-3 py-2 bg-slate-50 rounded border border-slate-200">
+                    <span class="truncate font-medium">${escapeHtml(p.name)}</span>
+                    <button onclick="removeSetting('projects', '${p.id}')" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="14"></i></button>
+                </li>
+            `).join('');
+
+            // Blocks list (grouped by Project)
+            const bList = document.getElementById('list-blocks');
+            bList.innerHTML = systemSettings.blocks.map(b => `
+                <li class="group flex justify-between items-center px-3 py-2 bg-slate-50 rounded border border-slate-200">
+                    <div>
+                        <span class="font-bold text-indigo-600">${escapeHtml(b.name)}</span>
+                        <span class="text-[10px] bg-slate-200 px-1 rounded ml-2 uppercase font-bold text-slate-500">${escapeHtml(b.projectId)}</span>
+                    </div>
+                    <button onclick="removeSetting('blocks', '${b.id}')" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="14"></i></button>
+                </li>
+            `).join('');
+
+            // Tech list
+            const tList = document.getElementById('list-techs');
+            tList.innerHTML = systemSettings.techs.map(t => `
+                <li class="group flex justify-between items-center px-3 py-2 bg-slate-50 rounded border border-slate-200">
+                    <span><b class="text-indigo-600">${escapeHtml(t.techId)}</b> — ${escapeHtml(t.techName)}</span>
+                    <button onclick="removeSetting('techs', '${t.id}')" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="14"></i></button>
+                </li>
+            `).join('');
+
+            // RQA list
+            const rList = document.getElementById('list-rqa');
+            rList.innerHTML = systemSettings.rqa.map(r => `
+                <li class="group flex justify-between items-center px-3 py-2 bg-slate-50 rounded border border-slate-200">
+                    <span>${escapeHtml(r.name)}</span>
+                    <button onclick="removeSetting('rqa', '${r.id}')" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="14"></i></button>
+                </li>
+            `).join('');
+
             lucide.createIcons();
         }
 
         function updateSpinners() {
-            const selectors = {
-                'create-project': systemSettings.projects,
-                'create-blockId': systemSettings.blocks,
-                'create-rqa': systemSettings.rqa
-            };
+            // Update Settings "Select Project" dropdown
+            const setProj = document.getElementById('link-block-project');
+            const currentSetVal = setProj.value;
+            setProj.innerHTML = '<option value="">Select Parent Project</option>' + 
+                systemSettings.projects.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join('');
+            setProj.value = currentSetVal;
 
-            for(const [id, data] of Object.entries(selectors)) {
-                const el = document.getElementById(id);
-                if (!el) continue;
-                const currentVal = el.value;
-                el.innerHTML = `<option value="">Select ${id.split('-')[1]}</option>` + 
-                    data.map(item => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`).join('');
-                el.value = currentVal;
-            }
+            // Update Create Form "Project" dropdown
+            const creProj = document.getElementById('create-project');
+            const currentCreVal = creProj.value;
+            creProj.innerHTML = '<option value="">Select Project</option>' + 
+                systemSettings.projects.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join('');
+            creProj.value = currentCreVal;
 
+            // Update Technicians
             const techEl = document.getElementById('create-tech');
-            if (techEl) {
-                const currentTech = techEl.value;
-                techEl.innerHTML = `<option value="">Select Technician</option>` + 
-                    systemSettings.techs.map(item => `<option value="${escapeHtml(item.techId)}|${escapeHtml(item.techName)}">${escapeHtml(item.techId)} - ${escapeHtml(item.techName)}</option>`).join('');
-                techEl.value = currentTech;
-            }
+            const currentTech = techEl.value;
+            techEl.innerHTML = `<option value="">Select Technician</option>` + 
+                systemSettings.techs.map(item => `<option value="${escapeHtml(item.techId)}|${escapeHtml(item.techName)}">${escapeHtml(item.techId)} - ${escapeHtml(item.techName)}</option>`).join('');
+            techEl.value = currentTech;
+
+            // Update RQA
+            const rqaEl = document.getElementById('create-rqa');
+            const currentRqa = rqaEl.value;
+            rqaEl.innerHTML = `<option value="">Select RQA Tech</option>` + 
+                systemSettings.rqa.map(item => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`).join('');
+            rqaEl.value = currentRqa;
         }
+
+        // Logic to filter Blocks based on Project
+        window.handleProjectChange = (projectName) => {
+            const blockSelect = document.getElementById('create-blockId');
+            if(!projectName) {
+                blockSelect.innerHTML = '<option value="">Select Project First</option>';
+                blockSelect.disabled = true;
+                blockSelect.classList.add('bg-slate-50');
+                return;
+            }
+
+            const filtered = systemSettings.blocks.filter(b => b.projectId === projectName);
+            blockSelect.disabled = false;
+            blockSelect.classList.remove('bg-slate-50');
+            
+            if(filtered.length === 0) {
+                blockSelect.innerHTML = '<option value="">No Blocks Found for Project</option>';
+            } else {
+                blockSelect.innerHTML = '<option value="">Select Block ID</option>' + 
+                    filtered.map(b => `<option value="${escapeHtml(b.name)}">${escapeHtml(b.name)}</option>`).join('');
+            }
+        };
 
         window.handleTechSelect = (select) => {
             const [id, name] = select.value.split('|');
@@ -453,20 +461,19 @@
                 document.getElementById('emptyState').classList.add('hidden');
                 disputesData.forEach(item => {
                     const row = document.createElement('tr');
-                    row.className = "hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors";
-                    
+                    row.className = "hover:bg-slate-50 border-b border-slate-100 last:border-0";
                     let sCls = "bg-yellow-100 text-yellow-800 border-yellow-200";
                     if(item.status === 'Resolved') sCls = "bg-green-100 text-green-800 border-green-200";
                     else if(item.status === 'Rejected') sCls = "bg-red-100 text-red-800 border-red-200";
 
                     row.innerHTML = `
                         <td class="px-6 py-4">
-                            <div class="font-medium text-slate-800">${escapeHtml(item.blockId)}</div>
-                            <div class="text-xs text-slate-400">${escapeHtml(item.techId)}</div>
+                            <div class="text-sm font-semibold text-slate-800">${escapeHtml(item.project)}</div>
+                            <div class="text-xs text-indigo-600 font-bold">${escapeHtml(item.blockId)}</div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-sm font-semibold text-slate-700">${escapeHtml(item.project)}</div>
-                            <div class="text-xs text-slate-400">Cat: ${escapeHtml(item.category)} • Type: ${escapeHtml(item.type)}</div>
+                            <div class="text-sm text-slate-700">${escapeHtml(item.techName)}</div>
+                            <div class="text-[10px] text-slate-400 font-mono">${escapeHtml(item.techId)}</div>
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-2.5 py-0.5 rounded-full text-xs font-medium border ${sCls}">${escapeHtml(item.status)}</span>
@@ -474,9 +481,9 @@
                         <td class="px-6 py-4 text-sm text-slate-600 max-w-xs truncate">${escapeHtml(item.reason)}</td>
                         <td class="px-6 py-4 text-right admin-only ${window.isAdmin ? '' : 'hidden'}">
                             <div class="flex justify-end gap-1">
-                                <button onclick="updateStatus('${item.id}', 'Resolved')" class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"><i data-lucide="check" size="16"></i></button>
-                                <button onclick="updateStatus('${item.id}', 'Rejected')" class="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"><i data-lucide="x" size="16"></i></button>
-                                <button onclick="deleteDispute('${item.id}')" class="p-1.5 text-red-400 hover:bg-red-50 rounded-lg transition-colors"><i data-lucide="trash-2" size="16"></i></button>
+                                <button onclick="updateStatus('${item.id}', 'Resolved')" class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"><i data-lucide="check" size="16"></i></button>
+                                <button onclick="updateStatus('${item.id}', 'Rejected')" class="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg"><i data-lucide="x" size="16"></i></button>
+                                <button onclick="deleteDispute('${item.id}')" class="p-1.5 text-red-400 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" size="16"></i></button>
                             </div>
                         </td>
                     `;
@@ -487,68 +494,43 @@
         };
 
         window.updateStatus = async (id, status) => {
-            if (!auth.currentUser) return;
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disputes', id), { status });
-            } catch (err) { console.error(err); }
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disputes', id), { status });
         };
 
         window.deleteDispute = async (id) => {
-            if (!auth.currentUser) return;
-            if(confirm("Delete this record permanently?")) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disputes', id));
-                } catch (err) { console.error(err); }
-            }
+            if(confirm("Permanently delete?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disputes', id));
         };
 
         document.getElementById('createForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!auth.currentUser) return;
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
-            btn.innerHTML = `<span>Submitting...</span><div class="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full"></div>`;
             
-            const data = Object.fromEntries(new FormData(e.target).entries());
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
             delete data.techData; 
 
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'disputes'), {
-                    ...data,
-                    status: 'Open',
-                    createdAt: serverTimestamp()
-                });
-                e.target.reset();
-                switchTab('list');
-            } catch (err) {
-                console.error(err);
-            } finally { 
-                btn.disabled = false;
-                btn.innerHTML = `<span>Submit Dispute</span><i data-lucide="check-circle-2" size="18"></i>`;
-                lucide.createIcons();
-            }
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'disputes'), {
+                ...data,
+                status: 'Open',
+                createdAt: serverTimestamp()
+            });
+            e.target.reset();
+            handleProjectChange(""); // Reset dependent dropdown
+            switchTab('list');
+            btn.disabled = false;
         });
 
         window.toggleAdmin = () => {
-            if (window.isAdmin) {
-                window.isAdmin = false;
-                applyAdminState();
-            } else {
-                document.getElementById('adminModal').classList.remove('hidden');
-                document.getElementById('adminPinInput').focus();
-            }
+            if (window.isAdmin) { window.isAdmin = false; applyAdminState(); } 
+            else { document.getElementById('adminModal').classList.remove('hidden'); document.getElementById('adminPinInput').focus(); }
         };
 
         window.verifyPin = () => {
             if (document.getElementById('adminPinInput').value === ADMIN_PIN) {
-                window.isAdmin = true;
-                applyAdminState();
-                closeAdminModal();
-                document.getElementById('adminPinInput').value = '';
-            } else { 
-                alert("Incorrect PIN code."); 
-                document.getElementById('adminPinInput').value = '';
-            }
+                window.isAdmin = true; applyAdminState(); closeAdminModal();
+            } else { alert("Wrong PIN"); }
+            document.getElementById('adminPinInput').value = '';
         };
 
         function applyAdminState() {
@@ -558,17 +540,13 @@
             const adminItems = document.querySelectorAll('.admin-only');
 
             if(window.isAdmin) {
-                badge.classList.remove('hidden');
-                badge.classList.add('flex');
-                avatar.innerText = 'AD'; 
-                avatar.classList.add('bg-red-100', 'text-red-700');
+                badge.classList.replace('hidden', 'flex');
+                avatar.innerText = 'AD'; avatar.classList.add('bg-red-100', 'text-red-700');
                 navSettings.classList.remove('hidden');
                 adminItems.forEach(el => el.classList.remove('hidden'));
             } else {
-                badge.classList.add('hidden');
-                badge.classList.remove('flex');
-                avatar.innerText = 'US'; 
-                avatar.classList.remove('bg-red-100', 'text-red-700');
+                badge.classList.replace('flex', 'hidden');
+                avatar.innerText = 'US'; avatar.classList.remove('bg-red-100', 'text-red-700');
                 navSettings.classList.add('hidden');
                 adminItems.forEach(el => el.classList.add('hidden'));
                 if(document.getElementById('pageTitle').innerText === 'Settings') switchTab('list');
@@ -577,24 +555,16 @@
         }
 
         window.closeAdminModal = () => document.getElementById('adminModal').classList.add('hidden');
-
         function escapeHtml(t) { return t ? t.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : ''; }
 
         window.switchTab = (tab) => {
             ['list', 'create', 'settings'].forEach(t => {
-                const view = document.getElementById(`view-${t}`);
-                if(view) view.classList.add('hidden');
-                const nav = document.getElementById(`nav-${t}`);
-                if(nav) nav.classList.remove('bg-indigo-600', 'text-white');
+                document.getElementById(`view-${t}`)?.classList.add('hidden');
+                document.getElementById(`nav-${t}`)?.classList.remove('bg-indigo-600', 'text-white');
             });
-
-            const targetView = document.getElementById(`view-${tab}`);
-            if (targetView) targetView.classList.remove('hidden');
-            const activeNav = document.getElementById(`nav-${tab}`);
-            if (activeNav) activeNav.classList.add('bg-indigo-600', 'text-white');
-            
-            const titles = {list: 'Dashboard', create: 'New Submission', settings: 'Settings'};
-            document.getElementById('pageTitle').innerText = titles[tab];
+            document.getElementById(`view-${tab}`)?.classList.remove('hidden');
+            document.getElementById(`nav-${tab}`)?.classList.add('bg-indigo-600', 'text-white');
+            document.getElementById('pageTitle').innerText = {list: 'Dashboard', create: 'New Submission', settings: 'Settings'}[tab];
             toggleSidebar(false);
             lucide.createIcons();
         };
