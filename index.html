@@ -215,6 +215,24 @@
             </div>
 
             <div id="view-settings" class="hidden fade-in max-w-6xl mx-auto space-y-8">
+                <!-- Retention Settings -->
+                <div class="bg-white p-8 rounded-2xl border-l-8 border-l-red-500 border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2 text-lg">
+                                <i data-lucide="trash-2" class="text-red-500"></i>
+                                Data Retention Policy
+                            </h3>
+                            <p class="text-slate-500 text-sm mt-1">Define when closed disputes (Resolved/Rejected) should be permanently deleted from the database.</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <input type="number" id="retention-days" min="1" max="365" placeholder="30" class="w-24 px-4 py-2 border rounded-lg text-sm font-bold text-center outline-none focus:border-red-500">
+                            <span class="text-slate-400 font-bold text-xs uppercase tracking-wider">Days</span>
+                            <button onclick="saveRetentionPolicy()" class="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-black transition-all">Apply</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                         <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
@@ -272,11 +290,10 @@
         </main>
     </div>
 
-    <!-- Details View Modal (Photo Style) -->
+    <!-- Details View Modal -->
     <div id="detailsModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[70] flex items-center justify-center p-4 md:p-10 transition-all duration-300 opacity-0">
         <div id="detailsCard" class="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden transform scale-95 transition-all duration-300">
             <div class="relative p-8 md:p-12">
-                <!-- Close Button -->
                 <button onclick="closeDetailsModal()" class="absolute top-6 right-6 md:top-10 md:right-10 h-10 w-10 bg-slate-100 text-slate-500 hover:bg-slate-200 rounded-full flex items-center justify-center transition-all">
                     <i data-lucide="x" size="20"></i>
                 </button>
@@ -386,7 +403,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAzcrNsEZKka6SBEC-plnydGJKTaiR9Sk0",
@@ -397,10 +414,10 @@
             appId: "1:1075809303666:web:e991c931f78e1e274916eb"
         };
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dispute-mgr-v1';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dispute-mgr-v2';
         let db, auth;
         let disputesData = [];
-        let systemSettings = { projects: [], techs: [], teams: [], rqaTechs: [] };
+        let systemSettings = { projects: [], techs: [], teams: [], rqaTechs: [], retentionDays: 30 };
         window.isAdmin = false;
 
         const getCollectionPath = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
@@ -433,11 +450,20 @@
         function startDataListeners() {
             if (!auth.currentUser) return;
 
+            // Global Disputes
             onSnapshot(getCollectionPath('disputes'), (snap) => {
                 disputesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 disputesData.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
                 renderMainTable();
-            }, (e) => console.error(e));
+            });
+
+            // System Config - Single Document for simple settings
+            onSnapshot(getDocPath('config', 'retention'), (doc) => {
+                if(doc.exists()) {
+                    systemSettings.retentionDays = doc.data().days || 30;
+                    document.getElementById('retention-days').value = systemSettings.retentionDays;
+                }
+            });
 
             onSnapshot(getCollectionPath('projects'), (snap) => {
                 systemSettings.projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -463,6 +489,37 @@
                 updateFormDropdowns();
             });
         }
+
+        // Cleanup Logic: Deletes Resolved/Rejected records older than X days
+        async function runAutoCleanup() {
+            if (!window.isAdmin) return;
+            const now = new Date();
+            const threshold = systemSettings.retentionDays * 24 * 60 * 60 * 1000;
+            
+            const toPurge = disputesData.filter(d => {
+                if (d.status === 'Open') return false;
+                if (!d.updatedAt && !d.createdAt) return false;
+                
+                const lastActivity = d.updatedAt ? d.updatedAt.toMillis() : d.createdAt.toMillis();
+                return (now.getTime() - lastActivity) > threshold;
+            });
+
+            for (const item of toPurge) {
+                try {
+                    await deleteDoc(getDocPath('disputes', item.id));
+                } catch(e) { console.error("Cleanup error", e); }
+            }
+        }
+
+        window.saveRetentionPolicy = async () => {
+            if (!auth.currentUser || !window.isAdmin) return;
+            const days = parseInt(document.getElementById('retention-days').value);
+            if (isNaN(days) || days < 1) return;
+            
+            await setDoc(getDocPath('config', 'retention'), { days });
+            alert(`Retention policy updated to ${days} days.`);
+            runAutoCleanup();
+        };
 
         window.saveProjectConfig = async () => {
             if (!auth.currentUser) return;
@@ -507,7 +564,10 @@
 
         window.updateStatus = async (id, status) => {
             if (!auth.currentUser) return;
-            await updateDoc(getDocPath('disputes', id), { status });
+            await updateDoc(getDocPath('disputes', id), { 
+                status, 
+                updatedAt: serverTimestamp() 
+            });
         };
 
         document.getElementById('createForm').addEventListener('submit', async (e) => {
@@ -536,11 +596,7 @@
         window.handleProjectChange = (val) => {
             const bInput = document.getElementById('create-blockId');
             const p = systemSettings.projects.find(p => p.name === val);
-            if(p) { 
-                bInput.value = p.blockId;
-            } else { 
-                bInput.value = "";
-            }
+            bInput.value = p ? p.blockId : "";
         };
 
         window.handleTechSelect = (s) => {
@@ -637,7 +693,8 @@
                             <div class="flex justify-end gap-1">
                                 <button onclick="openDetails('${item.id}')" class="h-8 w-8 flex items-center justify-center text-indigo-600 hover:bg-indigo-50 rounded-lg" title="View Details"><i data-lucide="eye" size="14"></i></button>
                                 <button onclick="updateStatus('${item.id}', 'Resolved')" class="h-8 w-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg" title="Mark Resolved"><i data-lucide="check" size="14"></i></button>
-                                <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 rounded-lg" title="Delete"><i data-lucide="trash-2" size="14"></i></button>
+                                <button onclick="updateStatus('${item.id}', 'Rejected')" class="h-8 w-8 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg" title="Reject"><i data-lucide="x-circle" size="14"></i></button>
+                                <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 rounded-lg" title="Delete Permanent"><i data-lucide="trash-2" size="14"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -683,13 +740,24 @@
         }
 
         window.toggleAdmin = () => {
-            if (window.isAdmin) { window.isAdmin = false; applyAdminState(); } 
-            else { document.getElementById('adminModal').classList.remove('hidden'); document.getElementById('adminPinInput').focus(); }
+            if (window.isAdmin) { 
+                window.isAdmin = false; 
+                applyAdminState(); 
+            } else { 
+                document.getElementById('adminModal').classList.remove('hidden'); 
+                document.getElementById('adminPinInput').focus(); 
+            }
         };
 
         window.verifyPin = () => {
-            if (document.getElementById('adminPinInput').value === '1234') { window.isAdmin = true; applyAdminState(); closeAdminModal(); }
-            else { alert("Wrong PIN."); }
+            if (document.getElementById('adminPinInput').value === '1234') { 
+                window.isAdmin = true; 
+                applyAdminState(); 
+                closeAdminModal();
+                runAutoCleanup(); // Run cleanup check on login
+            } else { 
+                alert("Wrong PIN."); 
+            }
             document.getElementById('adminPinInput').value = '';
         };
 
@@ -705,7 +773,7 @@
                 document.getElementById('adminBadge').classList.add('hidden');
                 document.getElementById('nav-settings').classList.add('hidden');
                 adminItems.forEach(el => el.classList.add('hidden'));
-                closeDetailsModal(); // Close if open to prevent access
+                closeDetailsModal();
             }
             renderMainTable();
         }
@@ -717,7 +785,8 @@
             });
             document.getElementById(`view-${tab}`)?.classList.remove('hidden');
             document.getElementById(`nav-${tab}`)?.classList.add('bg-indigo-600', 'text-white');
-            toggleSidebar(false); lucide.createIcons();
+            toggleSidebar(false); 
+            lucide.createIcons();
         };
 
         window.closeAdminModal = () => document.getElementById('adminModal').classList.add('hidden');
