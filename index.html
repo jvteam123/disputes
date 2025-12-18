@@ -81,7 +81,6 @@
 
         <main class="flex-1 overflow-y-auto p-4 md:p-8 relative">
             
-            <!-- Loading Overlay -->
             <div id="loading" class="absolute inset-0 flex items-center justify-center bg-slate-50 z-20 transition-opacity duration-500">
                 <div class="flex flex-col items-center gap-4">
                     <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
@@ -89,7 +88,6 @@
                 </div>
             </div>
 
-            <!-- List View -->
             <div id="view-list" class="fade-in">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
@@ -109,18 +107,15 @@
                         <div id="no-data" class="hidden py-20 text-center flex flex-col items-center justify-center text-slate-400">
                              <i data-lucide="database" size="48" class="mb-4 opacity-20"></i>
                              <p class="font-medium">No disputes found</p>
-                             <button onclick="switchTab('create')" class="mt-4 text-indigo-600 text-sm font-bold">Create your first dispute</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Create View -->
             <div id="view-create" class="hidden fade-in max-w-4xl mx-auto">
                 <form id="createForm" class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
                     <div class="p-6 md:p-10">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            <!-- Project & Block -->
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Project Name <span class="text-red-500">*</span></label>
@@ -129,14 +124,11 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Block ID <span class="text-red-500">*</span></label>
-                                    <select name="blockId" id="create-blockId" required disabled class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 disabled:opacity-50 transition-all">
-                                        <option value="">Select Project First</option>
-                                    </select>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Block ID (Number) <span class="text-red-500">*</span></label>
+                                    <input type="text" name="blockId" id="create-blockId" readonly required class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500 focus:outline-none transition-all" placeholder="Select project first">
                                 </div>
                             </div>
 
-                            <!-- Technician & Team -->
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Technician <span class="text-red-500">*</span></label>
@@ -154,7 +146,6 @@
                                 </div>
                             </div>
 
-                            <!-- RQA TechID & Initial UID -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">RQA TechID <span class="text-red-500">*</span></label>
@@ -168,7 +159,6 @@
                                 </div>
                             </div>
 
-                            <!-- Category & Type -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Category</label>
@@ -186,7 +176,6 @@
                                 </div>
                             </div>
 
-                            <!-- Partial -->
                             <div class="col-span-1 md:col-span-2">
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Partial Score</label>
                                 <div class="flex flex-wrap gap-2">
@@ -207,7 +196,6 @@
                                 </div>
                             </div>
 
-                            <!-- Reason -->
                             <div class="col-span-1 md:col-span-2">
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Reason for Dispute <span class="text-red-500">*</span></label>
                                 <textarea name="reason" required placeholder="Describe the issue in detail..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 min-h-[100px] transition-all"></textarea>
@@ -216,43 +204,37 @@
                     </div>
 
                     <div class="bg-slate-50 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <p class="text-xs text-slate-400">* Mandatory fields are required for submission.</p>
+                        <p class="text-xs text-slate-400">* All fields with asterisks are mandatory.</p>
                         <div class="flex gap-3 w-full md:w-auto">
                             <button type="button" onclick="switchTab('list')" class="flex-1 md:flex-none px-8 py-3 text-slate-600 font-semibold hover:bg-slate-200 rounded-xl transition-all">Discard</button>
                             <button type="submit" id="submitBtn" class="flex-1 md:flex-none px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2">
                                 <span>Submit Report</span>
-                                <i data-lucide="arrow-right" size="18"></i>
                             </button>
                         </div>
                     </div>
                 </form>
             </div>
 
-            <!-- Settings View -->
             <div id="view-settings" class="hidden fade-in max-w-6xl mx-auto space-y-8">
-                
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Projects -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                         <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
                             <span class="h-8 w-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center"><i data-lucide="folder-plus" size="18"></i></span>
-                            Projects & Blocks
+                            Manage Projects
                         </h3>
                         <div class="space-y-4 mb-6">
                             <input type="text" id="set-project-name" placeholder="Project Name" class="w-full px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
-                            <textarea id="set-project-blocks" placeholder="Block IDs (Comma separated)" class="w-full px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500"></textarea>
+                            <input type="number" id="set-project-block" placeholder="Numeric Block ID (e.g. 101)" class="w-full px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
                             <button onclick="saveProjectConfig()" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold">Add Project</button>
                         </div>
                         <div id="project-list" class="divide-y divide-slate-100 max-h-40 overflow-y-auto no-scrollbar"></div>
                     </div>
 
-                    <!-- Teams & RQA Techs -->
                     <div class="space-y-8">
-                        <!-- Teams -->
                         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                             <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
                                 <span class="h-8 w-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center"><i data-lucide="layers" size="18"></i></span>
-                                Team Management
+                                Teams
                             </h3>
                             <div class="flex gap-2 mb-6">
                                 <input type="text" id="new-team-name" placeholder="Team Name" class="flex-1 px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
@@ -261,14 +243,13 @@
                             <div id="team-list" class="flex flex-wrap gap-2"></div>
                         </div>
 
-                        <!-- RQA Techs -->
                         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                             <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
                                 <span class="h-8 w-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center"><i data-lucide="user-check" size="18"></i></span>
-                                RQA TechID List
+                                RQA TechIDs
                             </h3>
                             <div class="flex gap-2 mb-6">
-                                <input type="text" id="new-rqa-id" placeholder="RQA ID (e.g. RQA-01)" class="flex-1 px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
+                                <input type="text" id="new-rqa-id" placeholder="RQA-01" class="flex-1 px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
                                 <button onclick="saveRqaTech()" class="bg-orange-600 text-white px-6 py-2 rounded-lg font-bold">Add</button>
                             </div>
                             <div id="rqa-list" class="flex flex-wrap gap-2"></div>
@@ -276,80 +257,63 @@
                     </div>
                 </div>
 
-                <!-- Technicians -->
                 <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
                          <span class="h-8 w-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center"><i data-lucide="users" size="18"></i></span>
-                         Technician Roster
+                         Technicians
                     </h3>
                     <div class="flex flex-col md:flex-row gap-4 mb-8">
                         <input type="text" id="new-tech-id" placeholder="ID (T-10)" class="px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500 flex-1">
                         <input type="text" id="new-tech-name" placeholder="Full Name" class="px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500 flex-[2]">
-                        <button onclick="saveTech()" class="bg-slate-900 text-white px-8 py-2 rounded-lg hover:bg-black transition-colors font-bold">Add Member</button>
+                        <button onclick="saveTech()" class="bg-slate-900 text-white px-8 py-2 rounded-lg hover:bg-black transition-colors font-bold">Add</button>
                     </div>
                     <div id="tech-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
                 </div>
             </div>
-
         </main>
     </div>
 
-    <!-- Admin Pin Modal -->
     <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 fade-in">
         <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-sm text-center">
-            <div class="h-16 w-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <i data-lucide="lock" size="32"></i>
-            </div>
             <h3 class="text-xl font-bold mb-2">Restricted Area</h3>
-            <p class="text-slate-500 text-sm mb-6">Please enter the administrator PIN to continue.</p>
+            <p class="text-slate-500 text-sm mb-6">Enter Admin PIN</p>
             <input type="password" id="adminPinInput" placeholder="••••" maxlength="4" class="w-full px-4 py-4 text-center tracking-[1em] text-3xl bg-slate-50 border border-slate-200 rounded-2xl mb-6 outline-none focus:border-indigo-500 transition-all">
             <div class="flex gap-3">
-                <button onclick="closeAdminModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all">Cancel</button>
-                <button onclick="verifyPin()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">Enter</button>
+                <button onclick="closeAdminModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">Cancel</button>
+                <button onclick="verifyPin()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg">Enter</button>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // APP CONFIG & PATH SETUP (MANDATORY PATTERN)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzcrNsEZKka6SBEC-plnydGJKTaiR9Sk0",
+            authDomain: "dispute-216ae.firebaseapp.com",
+            projectId: "dispute-216ae",
+            storageBucket: "dispute-216ae.firebasestorage.app",
+            messagingSenderId: "1075809303666",
+            appId: "1:1075809303666:web:e991c931f78e1e274916eb"
+        };
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'dispute-mgr-v1';
         let db, auth;
         let disputesData = [];
         let systemSettings = { projects: [], techs: [], teams: [], rqaTechs: [] };
         window.isAdmin = false;
 
-        // PATH HELPERS (Strict Rule 1 Enforcement)
         const getCollectionPath = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
         const getDocPath = (name, id) => doc(db, 'artifacts', appId, 'public', 'data', name, id);
 
-        // UI Helpers
-        function hideLoader() {
-            const loader = document.getElementById('loading');
-            if (loader) {
-                loader.classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => loader.style.display = 'none', 500);
-            }
-        }
-
         async function startApp() {
-            if (typeof __firebase_config === 'undefined') {
-                console.error("Firebase config not found.");
-                hideLoader();
-                return;
-            }
-            
             try {
-                const config = JSON.parse(__firebase_config);
-                const app = initializeApp(config);
+                const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // MANDATORY AUTH SEQUENCE (Rule 3)
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -357,20 +321,12 @@
                 }
 
                 onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        startDataListeners();
-                    } else {
-                        console.warn("User not logged in.");
-                        hideLoader();
-                    }
+                    if (user) startDataListeners();
                 });
 
-                // Failsafe hide loader
-                setTimeout(hideLoader, 6000);
-
+                setTimeout(() => document.getElementById('loading')?.classList.add('opacity-0', 'pointer-events-none'), 2000);
             } catch (err) {
                 console.error("Firebase Init Error:", err);
-                hideLoader();
             }
         }
 
@@ -379,55 +335,45 @@
         function startDataListeners() {
             if (!auth.currentUser) return;
 
-            const handleError = (e) => {
-                console.error("Firestore error:", e);
-                hideLoader();
-            };
-
-            // Main listener
             onSnapshot(getCollectionPath('disputes'), (snap) => {
                 disputesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 disputesData.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
                 renderMainTable();
-                hideLoader();
-            }, handleError);
+            }, (e) => console.error(e));
 
-            // Settings Listeners
             onSnapshot(getCollectionPath('projects'), (snap) => {
                 systemSettings.projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderSettingsProjects();
                 updateFormDropdowns();
-            }, handleError);
+            });
 
             onSnapshot(getCollectionPath('techs'), (snap) => {
                 systemSettings.techs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderSettingsTechs();
                 updateFormDropdowns();
-            }, handleError);
+            });
 
             onSnapshot(getCollectionPath('teams'), (snap) => {
                 systemSettings.teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderSettingsTeams();
                 updateFormDropdowns();
-            }, handleError);
+            });
 
             onSnapshot(getCollectionPath('rqatechs'), (snap) => {
                 systemSettings.rqaTechs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderSettingsRqaTechs();
                 updateFormDropdowns();
-            }, handleError);
+            });
         }
 
-        // --- GLOBAL ACTIONS ---
-        
         window.saveProjectConfig = async () => {
             if (!auth.currentUser) return;
             const name = document.getElementById('set-project-name').value.trim();
-            const blocks = document.getElementById('set-project-blocks').value.trim().split(',').map(b=>b.trim()).filter(b=>b);
-            if(!name || blocks.length === 0) return;
-            await addDoc(getCollectionPath('projects'), { name, blocks });
+            const block = document.getElementById('set-project-block').value.trim();
+            if(!name || !block || isNaN(block)) return;
+            await addDoc(getCollectionPath('projects'), { name, blockId: block });
             document.getElementById('set-project-name').value = ''; 
-            document.getElementById('set-project-blocks').value = '';
+            document.getElementById('set-project-block').value = '';
         };
 
         window.saveTech = async () => {
@@ -471,42 +417,31 @@
             if (!auth.currentUser) return;
             const btn = document.getElementById('submitBtn'); 
             btn.disabled = true;
-            btn.innerText = "Submitting...";
-
             try {
                 const formData = new FormData(e.target);
                 const data = Object.fromEntries(formData.entries());
                 delete data.techData;
-                
                 await addDoc(getCollectionPath('disputes'), {
                     ...data, 
                     status: 'Open', 
                     createdAt: serverTimestamp()
                 });
-                
                 e.target.reset(); 
-                handleProjectChange(""); 
+                document.getElementById('create-blockId').value = "";
                 switchTab('list');
-            } catch (err) {
-                console.error(err);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<span>Submit Report</span><i data-lucide="arrow-right" size="18"></i>`;
                 lucide.createIcons();
             }
         });
 
-        // --- UI RENDERING ---
-
         window.handleProjectChange = (val) => {
-            const bSel = document.getElementById('create-blockId');
+            const bInput = document.getElementById('create-blockId');
             const p = systemSettings.projects.find(p => p.name === val);
             if(p) { 
-                bSel.disabled = false; 
-                bSel.innerHTML = p.blocks.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join(''); 
+                bInput.value = p.blockId;
             } else { 
-                bSel.disabled = true; 
-                bSel.innerHTML = '<option>Select Project First</option>'; 
+                bInput.value = "";
             }
         };
 
@@ -548,7 +483,7 @@
                     <tr class="hover:bg-slate-50 border-b border-slate-50 fade-in">
                         <td class="px-6 py-4">
                             <div class="text-sm font-bold">${escapeHtml(item.project)}</div>
-                            <div class="text-[10px] text-indigo-500 font-bold uppercase">${escapeHtml(item.blockId)}</div>
+                            <div class="text-[10px] text-indigo-500 font-bold uppercase">Block ${escapeHtml(item.blockId)}</div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm font-medium text-slate-700">${escapeHtml(item.techName)}</div>
@@ -560,14 +495,14 @@
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusColor}">${escapeHtml(item.status)}</span>
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">CAT ${item.category} • UID: ${item.fpUid || 'N/A'} • Partial: ${item.partial}</div>
-                            <div class="text-xs text-slate-600 max-w-xs truncate">${escapeHtml(item.reason)}</div>
+                        <td class="px-6 py-4 text-xs">
+                            <div class="font-bold text-slate-400 mb-1">CAT ${item.category} • UID: ${item.fpUid}</div>
+                            <div class="text-slate-600 max-w-xs truncate">${escapeHtml(item.reason)}</div>
                         </td>
                         <td class="px-6 py-4 text-right admin-only ${window.isAdmin ? '' : 'hidden'}">
                             <div class="flex justify-end gap-1">
-                                <button onclick="updateStatus('${item.id}', 'Resolved')" class="h-8 w-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg" title="Resolve"><i data-lucide="check" size="14"></i></button>
-                                <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg" title="Delete"><i data-lucide="trash-2" size="14"></i></button>
+                                <button onclick="updateStatus('${item.id}', 'Resolved')" class="h-8 w-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg"><i data-lucide="check" size="14"></i></button>
+                                <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 rounded-lg"><i data-lucide="trash-2" size="14"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -579,7 +514,7 @@
         function renderSettingsProjects() {
             document.getElementById('project-list').innerHTML = systemSettings.projects.map(p => `
                 <div class="p-3 flex justify-between items-center group">
-                    <span class="text-sm font-semibold">${p.name}</span>
+                    <span class="text-sm font-semibold">${p.name} (Block: ${p.blockId})</span>
                     <button onclick="removeDoc('projects', '${p.id}')" class="text-slate-300 hover:text-red-500"><i data-lucide="x" size="14"></i></button>
                 </div>`).join('');
             lucide.createIcons();
@@ -588,7 +523,7 @@
         function renderSettingsTechs() {
             document.getElementById('tech-list').innerHTML = systemSettings.techs.map(t => `
                 <div class="p-2 bg-slate-50 border rounded-lg flex justify-between items-center">
-                    <span class="text-xs font-bold">${t.techName}</span>
+                    <span class="text-xs font-bold">${t.techId} - ${t.techName}</span>
                     <button onclick="removeDoc('techs', '${t.id}')" class="text-slate-300 hover:text-red-500"><i data-lucide="x" size="12"></i></button>
                 </div>`).join('');
             lucide.createIcons();
@@ -612,89 +547,51 @@
             lucide.createIcons();
         }
 
-        // --- UI NAVIGATION ---
-
         window.toggleAdmin = () => {
-            if (window.isAdmin) { 
-                window.isAdmin = false; 
-                applyAdminState(); 
-            } else { 
-                document.getElementById('adminModal').classList.remove('hidden'); 
-                document.getElementById('adminPinInput').focus(); 
-            }
+            if (window.isAdmin) { window.isAdmin = false; applyAdminState(); } 
+            else { document.getElementById('adminModal').classList.remove('hidden'); document.getElementById('adminPinInput').focus(); }
         };
 
         window.verifyPin = () => {
-            if (document.getElementById('adminPinInput').value === '1234') { 
-                window.isAdmin = true; 
-                applyAdminState(); 
-                closeAdminModal(); 
-            } else { 
-                alert("Incorrect PIN."); 
-            }
+            if (document.getElementById('adminPinInput').value === '1234') { window.isAdmin = true; applyAdminState(); closeAdminModal(); }
+            else { alert("Wrong PIN."); }
             document.getElementById('adminPinInput').value = '';
         };
 
         function applyAdminState() {
             const adminItems = document.querySelectorAll('.admin-only');
-            const avatar = document.getElementById('userAvatar');
-            const badge = document.getElementById('adminBadge');
-
             if(window.isAdmin) {
-                avatar.innerText = 'AD'; 
-                avatar.classList.add('bg-red-50', 'text-red-600');
-                badge.classList.remove('hidden');
-                badge.classList.add('flex');
+                document.getElementById('userAvatar').innerText = 'AD';
+                document.getElementById('adminBadge').classList.remove('hidden');
                 document.getElementById('nav-settings').classList.remove('hidden');
                 adminItems.forEach(el => el.classList.remove('hidden'));
             } else {
-                avatar.innerText = 'US'; 
-                avatar.classList.remove('bg-red-50', 'text-red-600');
-                badge.classList.add('hidden');
-                badge.classList.remove('flex');
+                document.getElementById('userAvatar').innerText = 'US';
+                document.getElementById('adminBadge').classList.add('hidden');
                 document.getElementById('nav-settings').classList.add('hidden');
                 adminItems.forEach(el => el.classList.add('hidden'));
-                if(document.getElementById('pageTitle').innerText === 'Settings') switchTab('list');
             }
             renderMainTable();
         }
 
         window.switchTab = (tab) => {
             ['list', 'create', 'settings'].forEach(t => {
-                const view = document.getElementById(`view-${t}`);
-                const nav = document.getElementById(`nav-${t}`);
-                if (view) view.classList.add('hidden');
-                if (nav) nav.classList.remove('bg-indigo-600', 'text-white');
+                document.getElementById(`view-${t}`)?.classList.add('hidden');
+                document.getElementById(`nav-${t}`)?.classList.remove('bg-indigo-600', 'text-white');
             });
-            
-            const targetView = document.getElementById(`view-${tab}`);
-            const targetNav = document.getElementById(`nav-${tab}`);
-            
-            if (targetView) targetView.classList.remove('hidden');
-            if (targetNav) targetNav.classList.add('bg-indigo-600', 'text-white');
-            
-            document.getElementById('pageTitle').innerText = {list: 'Dashboard Overview', create: 'Report New Dispute', settings: 'System Settings'}[tab];
-            toggleSidebar(false); 
-            lucide.createIcons();
+            document.getElementById(`view-${tab}`)?.classList.remove('hidden');
+            document.getElementById(`nav-${tab}`)?.classList.add('bg-indigo-600', 'text-white');
+            toggleSidebar(false); lucide.createIcons();
         };
 
         window.closeAdminModal = () => document.getElementById('adminModal').classList.add('hidden');
-        
         window.toggleSidebar = (s) => {
             const side = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            if (s === false || !side.classList.contains('-translate-x-full')) { 
-                side.classList.add('-translate-x-full'); 
-                overlay.classList.add('hidden');
-            } else { 
-                side.classList.remove('-translate-x-full'); 
-                overlay.classList.remove('hidden');
-            }
+            if (s === false) side.classList.add('-translate-x-full');
+            else side.classList.toggle('-translate-x-full');
         };
 
-        function escapeHtml(t) { 
-            return t ? t.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : ''; 
-        }
+        function escapeHtml(t) { return t ? t.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : ''; }
     </script>
 </body>
 </html>
