@@ -620,35 +620,36 @@
         }
 
         window.openDetails = (id) => {
-            const item = disputesData.find(d => d.id === id);
-            if (!item) return;
+    const item = disputesData.find(d => d.id === id);
+    if (!item) return;
 
-            document.getElementById('det-project').innerText = item.project;
-            document.getElementById('det-blockId').innerText = item.blockId;
-            document.getElementById('det-tech').innerText = `${item.techName} (${item.techId})`;
-            document.getElementById('det-team').innerText = item.team;
-            document.getElementById('det-rqa').innerText = item.rqaTechId;
-            document.getElementById('det-cat').innerText = item.category;
-            document.getElementById('det-uid').innerText = item.fpUid;
-            document.getElementById('det-type').innerText = item.type;
-            document.getElementById('det-reason').innerText = item.reason;
-            document.getElementById('det-score').innerText = item.partial;
-            
-            const statusEl = document.getElementById('det-status');
-            statusEl.innerText = item.status;
-            let statusClass = item.status === 'Resolved' ? "bg-emerald-100 text-emerald-700" : (item.status === 'Rejected' ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700");
-            statusEl.className = `px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${statusClass}`;
+    // Corrected keys to match Form Data names
+    document.getElementById('det-project').innerText = item.project;
+    document.getElementById('det-blockId').innerText = item.blockId;
+    document.getElementById('det-tech').innerText = `${item.techName} (${item.techId})`;
+    document.getElementById('det-team').innerText = item.team;
+    document.getElementById('det-rqa').innerText = item.rqaTechId; // Changed from item.rqa
+    document.getElementById('det-cat').innerText = item.category;  // Changed from item.cat
+    document.getElementById('det-uid').innerText = item.fpUid;    // Changed from item.uid
+    document.getElementById('det-type').innerText = item.type;
+    document.getElementById('det-reason').innerText = item.reason;
+    document.getElementById('det-score').innerText = item.partial; // Changed from item.score
+    
+    const statusEl = document.getElementById('det-status');
+    statusEl.innerText = item.status;
+    let statusClass = item.status === 'Resolved' ? "bg-emerald-100 text-emerald-700" : (item.status === 'Rejected' ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700");
+    statusEl.className = `px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${statusClass}`;
 
-            const modal = document.getElementById('detailsModal');
-            const card = document.getElementById('detailsCard');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.add('opacity-100');
-                card.classList.remove('scale-95');
-                card.classList.add('scale-100');
-            }, 10);
-            lucide.createIcons();
-        };
+    const modal = document.getElementById('detailsModal');
+    const card = document.getElementById('detailsCard');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.add('opacity-100');
+        card.classList.remove('scale-95');
+        card.classList.add('scale-100');
+    }, 10);
+    lucide.createIcons();
+};
 
         window.closeDetailsModal = () => {
             const modal = document.getElementById('detailsModal');
