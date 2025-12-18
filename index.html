@@ -332,10 +332,15 @@
                             <p class="text-[8px] font-black uppercase text-slate-400">Category</p>
                             <p id="det-cat" class="text-xs font-bold text-slate-700">---</p>
                         </div>
-                        <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg max-w-[150px]">
-                            <p class="text-[8px] font-black uppercase text-slate-400">UID</p>
-                            <p id="det-uid" class="text-xs font-bold text-slate-700 truncate">---</p>
-                        </div>
+                        <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg relative group/uid">
+    <p class="text-[8px] font-black uppercase text-slate-400">UID</p>
+    <div class="flex items-center gap-2">
+        <p id="det-uid" class="text-xs font-bold text-slate-700 truncate max-w-[180px]">---</p>
+        <button onclick="copyUid()" class="text-slate-400 hover:text-indigo-600 transition-colors" title="Copy UID">
+            <i data-lucide="copy" size="12"></i>
+        </button>
+    </div>
+</div>
                         <div class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
                             <p class="text-[8px] font-black uppercase text-slate-400">Type</p>
                             <p id="det-type" class="text-xs font-bold text-slate-700">---</p>
@@ -471,6 +476,7 @@
             });
         }
 
+        
         // Cleanup Logic: Deletes Resolved/Rejected records older than X days
         async function runAutoCleanup() {
             if (!window.isAdmin) return;
@@ -640,6 +646,27 @@
             card.classList.remove('scale-100');
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
+
+        window.copyUid = () => {
+    const uidText = document.getElementById('det-uid').innerText;
+    if (uidText === "---") return;
+
+    navigator.clipboard.writeText(uidText).then(() => {
+        // Optional: simple visual feedback
+        const btn = event.currentTarget;
+        const originalInner = btn.innerHTML;
+        
+        btn.innerHTML = '<i data-lucide="check" size="12" class="text-emerald-500"></i>';
+        lucide.createIcons();
+        
+        setTimeout(() => {
+            btn.innerHTML = originalInner;
+            lucide.createIcons();
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
+};
 
         function renderMainTable() {
             const body = document.getElementById('disputesTableBody');
