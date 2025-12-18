@@ -97,6 +97,7 @@
                                 <tr class="bg-slate-50 border-b border-slate-200 text-[11px] uppercase text-slate-400 font-bold tracking-widest">
                                     <th class="px-6 py-5">Project / Block</th>
                                     <th class="px-6 py-5">Technician / Team</th>
+                                    <th class="px-6 py-5">RQA ID</th>
                                     <th class="px-6 py-5">Status</th>
                                     <th class="px-6 py-5">Info</th>
                                     <th class="px-6 py-5 text-right admin-only hidden">Actions</th>
@@ -147,10 +148,18 @@
                                 </div>
                             </div>
 
-                            <!-- Initial FP's UID (New Input) -->
-                            <div class="col-span-1">
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Initial FP's UID <span class="text-red-500">*</span></label>
-                                <input type="text" name="fpUid" required placeholder="Enter UID manually" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-all">
+                            <!-- RQA TechID & Initial UID -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">RQA TechID <span class="text-red-500">*</span></label>
+                                    <select name="rqaTechId" id="create-rqa-tech" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-all">
+                                        <option value="">Select RQA</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Initial FP's UID <span class="text-red-500">*</span></label>
+                                    <input type="text" name="fpUid" required placeholder="UID" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-all">
+                                </div>
                             </div>
 
                             <!-- Category & Type -->
@@ -171,7 +180,7 @@
                                 </div>
                             </div>
 
-                            <!-- Partial (New Requirement) -->
+                            <!-- Partial -->
                             <div class="col-span-1 md:col-span-2">
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Partial Score</label>
                                 <div class="flex flex-wrap gap-2">
@@ -231,17 +240,33 @@
                         <div id="project-list" class="divide-y divide-slate-100 max-h-40 overflow-y-auto no-scrollbar"></div>
                     </div>
 
-                    <!-- Teams -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                            <span class="h-8 w-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center"><i data-lucide="layers" size="18"></i></span>
-                            Team Management
-                        </h3>
-                        <div class="flex gap-2 mb-6">
-                            <input type="text" id="new-team-name" placeholder="Team Name (e.g. ALPHA)" class="flex-1 px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
-                            <button onclick="saveTeam()" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-bold">Add</button>
+                    <!-- Teams & RQA Techs -->
+                    <div class="space-y-8">
+                        <!-- Teams -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                <span class="h-8 w-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center"><i data-lucide="layers" size="18"></i></span>
+                                Team Management
+                            </h3>
+                            <div class="flex gap-2 mb-6">
+                                <input type="text" id="new-team-name" placeholder="Team Name" class="flex-1 px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
+                                <button onclick="saveTeam()" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-bold">Add</button>
+                            </div>
+                            <div id="team-list" class="flex flex-wrap gap-2"></div>
                         </div>
-                        <div id="team-list" class="flex flex-wrap gap-2"></div>
+
+                        <!-- RQA Techs -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                <span class="h-8 w-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center"><i data-lucide="user-check" size="18"></i></span>
+                                RQA TechID List
+                            </h3>
+                            <div class="flex gap-2 mb-6">
+                                <input type="text" id="new-rqa-id" placeholder="RQA ID (e.g. RQA-01)" class="flex-1 px-4 py-2 border rounded-lg text-sm outline-none focus:border-indigo-500">
+                                <button onclick="saveRqaTech()" class="bg-orange-600 text-white px-6 py-2 rounded-lg font-bold">Add</button>
+                            </div>
+                            <div id="rqa-list" class="flex flex-wrap gap-2"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -288,7 +313,7 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'dispute-mgr-v1';
         let db, auth;
         let disputesData = [];
-        let systemSettings = { projects: [], techs: [], teams: [] };
+        let systemSettings = { projects: [], techs: [], teams: [], rqaTechs: [] };
         window.isAdmin = false;
 
         function startApp(config) {
@@ -356,6 +381,12 @@
                 renderSettingsTeams();
                 updateFormDropdowns();
             }, handleError);
+
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'rqatechs'), (snap) => {
+                systemSettings.rqaTechs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderSettingsRqaTechs();
+                updateFormDropdowns();
+            }, handleError);
         }
 
         // Global Actions
@@ -380,6 +411,13 @@
             if(!name || !auth.currentUser) return;
             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'teams'), { name });
             document.getElementById('new-team-name').value = '';
+        };
+
+        window.saveRqaTech = async () => {
+            const rqaId = document.getElementById('new-rqa-id').value.trim();
+            if(!rqaId || !auth.currentUser) return;
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'rqatechs'), { rqaId });
+            document.getElementById('new-rqa-id').value = '';
         };
 
         window.removeDoc = async (col, docId) => {
@@ -427,6 +465,9 @@
 
             const teamSel = document.getElementById('create-team');
             teamSel.innerHTML = '<option value="">Select Team</option>' + systemSettings.teams.map(t => `<option value="${escapeHtml(t.name)}">${escapeHtml(t.name)}</option>`).join('');
+
+            const rqaSel = document.getElementById('create-rqa-tech');
+            rqaSel.innerHTML = '<option value="">Select RQA</option>' + systemSettings.rqaTechs.map(t => `<option value="${escapeHtml(t.rqaId)}">${escapeHtml(t.rqaId)}</option>`).join('');
         }
 
         function renderMainTable() {
@@ -442,6 +483,9 @@
                         <td class="px-6 py-4">
                             <div class="text-sm font-medium text-slate-700">${escapeHtml(item.techName)}</div>
                             <div class="text-[10px] text-slate-400 font-bold uppercase">${escapeHtml(item.team || 'No Team')}</div>
+                        </td>
+                         <td class="px-6 py-4">
+                            <div class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500 uppercase inline-block">${escapeHtml(item.rqaTechId || '---')}</div>
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusColor}">${escapeHtml(item.status)}</span>
@@ -485,6 +529,15 @@
                 <div class="flex items-center gap-2 px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full border border-purple-100 text-xs font-black uppercase">
                     ${t.name}
                     <button onclick="removeDoc('teams', '${t.id}')" class="hover:text-red-500"><i data-lucide="x" size="12"></i></button>
+                </div>`).join('');
+            lucide.createIcons();
+        }
+
+        function renderSettingsRqaTechs() {
+            document.getElementById('rqa-list').innerHTML = systemSettings.rqaTechs.map(t => `
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-orange-50 text-orange-700 rounded-full border border-orange-100 text-xs font-black uppercase">
+                    ${t.rqaId}
+                    <button onclick="removeDoc('rqatechs', '${t.id}')" class="hover:text-red-500"><i data-lucide="x" size="12"></i></button>
                 </div>`).join('');
             lucide.createIcons();
         }
