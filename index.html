@@ -81,7 +81,8 @@
 
         <main class="flex-1 overflow-y-auto p-4 md:p-8 relative">
             
-            <div id="loading" class="absolute inset-0 flex items-center justify-center bg-slate-50 z-20 transition-opacity duration-300">
+            <!-- Loading Overlay -->
+            <div id="loading" class="absolute inset-0 flex items-center justify-center bg-slate-50 z-20 transition-opacity duration-500">
                 <div class="flex flex-col items-center gap-4">
                     <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
                     <span id="loadingText" class="text-slate-400 text-sm font-medium">Connecting to service...</span>
@@ -105,6 +106,11 @@
                             </thead>
                             <tbody id="disputesTableBody" class="divide-y divide-slate-100"></tbody>
                         </table>
+                        <div id="no-data" class="hidden py-20 text-center flex flex-col items-center justify-center text-slate-400">
+                             <i data-lucide="database" size="48" class="mb-4 opacity-20"></i>
+                             <p class="font-medium">No disputes found</p>
+                             <button onclick="switchTab('create')" class="mt-4 text-indigo-600 text-sm font-bold">Create your first dispute</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -310,144 +316,198 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // APP CONFIG & PATH SETUP (MANDATORY PATTERN)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'dispute-mgr-v1';
         let db, auth;
         let disputesData = [];
         let systemSettings = { projects: [], techs: [], teams: [], rqaTechs: [] };
         window.isAdmin = false;
 
-        function startApp(config) {
-            const app = initializeApp(config);
-            auth = getAuth(app);
-            db = getFirestore(app);
+        // PATH HELPERS (Strict Rule 1 Enforcement)
+        const getCollectionPath = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
+        const getDocPath = (name, id) => doc(db, 'artifacts', appId, 'public', 'data', name, id);
 
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-            const initAuth = async () => {
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (err) {
-                    console.error("Auth failed:", err);
-                    try { await signInAnonymously(auth); } catch(e) {}
-                }
-            };
-
-            initAuth();
-            onAuthStateChanged(auth, (user) => { if (user) startDataListeners(); });
-        }
-
-        function checkEnvironment() {
-            if (typeof __firebase_config !== 'undefined') {
-                try {
-                    const config = JSON.parse(__firebase_config);
-                    if (config.apiKey) { startApp(config); return true; }
-                } catch (e) { console.error(e); }
+        // UI Helpers
+        function hideLoader() {
+            const loader = document.getElementById('loading');
+            if (loader) {
+                loader.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => loader.style.display = 'none', 500);
             }
-            return false;
         }
 
-        if (!checkEnvironment()) {
-            const retryInterval = setInterval(() => { if (checkEnvironment()) clearInterval(retryInterval); }, 2000);
+        async function startApp() {
+            if (typeof __firebase_config === 'undefined') {
+                console.error("Firebase config not found.");
+                hideLoader();
+                return;
+            }
+            
+            try {
+                const config = JSON.parse(__firebase_config);
+                const app = initializeApp(config);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // MANDATORY AUTH SEQUENCE (Rule 3)
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        startDataListeners();
+                    } else {
+                        console.warn("User not logged in.");
+                        hideLoader();
+                    }
+                });
+
+                // Failsafe hide loader
+                setTimeout(hideLoader, 6000);
+
+            } catch (err) {
+                console.error("Firebase Init Error:", err);
+                hideLoader();
+            }
         }
+
+        window.onload = startApp;
 
         function startDataListeners() {
-            const handleError = (e) => console.error(e);
+            if (!auth.currentUser) return;
 
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'disputes'), (snap) => {
+            const handleError = (e) => {
+                console.error("Firestore error:", e);
+                hideLoader();
+            };
+
+            // Main listener
+            onSnapshot(getCollectionPath('disputes'), (snap) => {
                 disputesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 disputesData.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
                 renderMainTable();
-                document.getElementById('loading').classList.add('opacity-0', 'pointer-events-none');
+                hideLoader();
             }, handleError);
 
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'projects'), (snap) => {
+            // Settings Listeners
+            onSnapshot(getCollectionPath('projects'), (snap) => {
                 systemSettings.projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderSettingsProjects();
                 updateFormDropdowns();
             }, handleError);
 
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'techs'), (snap) => {
+            onSnapshot(getCollectionPath('techs'), (snap) => {
                 systemSettings.techs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderSettingsTechs();
                 updateFormDropdowns();
             }, handleError);
 
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'teams'), (snap) => {
+            onSnapshot(getCollectionPath('teams'), (snap) => {
                 systemSettings.teams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderSettingsTeams();
                 updateFormDropdowns();
             }, handleError);
 
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'rqatechs'), (snap) => {
+            onSnapshot(getCollectionPath('rqatechs'), (snap) => {
                 systemSettings.rqaTechs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderSettingsRqaTechs();
                 updateFormDropdowns();
             }, handleError);
         }
 
-        // Global Actions
+        // --- GLOBAL ACTIONS ---
+        
         window.saveProjectConfig = async () => {
+            if (!auth.currentUser) return;
             const name = document.getElementById('set-project-name').value.trim();
             const blocks = document.getElementById('set-project-blocks').value.trim().split(',').map(b=>b.trim()).filter(b=>b);
-            if(!name || blocks.length === 0 || !auth.currentUser) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'projects'), { name, blocks });
-            document.getElementById('set-project-name').value = ''; document.getElementById('set-project-blocks').value = '';
+            if(!name || blocks.length === 0) return;
+            await addDoc(getCollectionPath('projects'), { name, blocks });
+            document.getElementById('set-project-name').value = ''; 
+            document.getElementById('set-project-blocks').value = '';
         };
 
         window.saveTech = async () => {
+            if (!auth.currentUser) return;
             const techId = document.getElementById('new-tech-id').value.trim();
             const techName = document.getElementById('new-tech-name').value.trim();
-            if(!techId || !techName || !auth.currentUser) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'techs'), { techId, techName });
-            document.getElementById('new-tech-id').value = ''; document.getElementById('new-tech-name').value = '';
+            if(!techId || !techName) return;
+            await addDoc(getCollectionPath('techs'), { techId, techName });
+            document.getElementById('new-tech-id').value = ''; 
+            document.getElementById('new-tech-name').value = '';
         };
 
         window.saveTeam = async () => {
+            if (!auth.currentUser) return;
             const name = document.getElementById('new-team-name').value.trim();
-            if(!name || !auth.currentUser) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'teams'), { name });
+            if(!name) return;
+            await addDoc(getCollectionPath('teams'), { name });
             document.getElementById('new-team-name').value = '';
         };
 
         window.saveRqaTech = async () => {
+            if (!auth.currentUser) return;
             const rqaId = document.getElementById('new-rqa-id').value.trim();
-            if(!rqaId || !auth.currentUser) return;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'rqatechs'), { rqaId });
+            if(!rqaId) return;
+            await addDoc(getCollectionPath('rqatechs'), { rqaId });
             document.getElementById('new-rqa-id').value = '';
         };
 
         window.removeDoc = async (col, docId) => {
             if (!auth.currentUser || !confirm("Delete this entry?")) return;
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, docId));
+            await deleteDoc(getDocPath(col, docId));
         };
 
         window.updateStatus = async (id, status) => {
             if (!auth.currentUser) return;
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disputes', id), { status });
+            await updateDoc(getDocPath('disputes', id), { status });
         };
 
         document.getElementById('createForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!auth.currentUser) return;
-            const btn = document.getElementById('submitBtn'); btn.disabled = true;
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            delete data.techData;
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'disputes'), {
-                ...data, status: 'Open', createdAt: serverTimestamp()
-            });
-            e.target.reset(); handleProjectChange(""); switchTab('list'); btn.disabled = false;
+            const btn = document.getElementById('submitBtn'); 
+            btn.disabled = true;
+            btn.innerText = "Submitting...";
+
+            try {
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                delete data.techData;
+                
+                await addDoc(getCollectionPath('disputes'), {
+                    ...data, 
+                    status: 'Open', 
+                    createdAt: serverTimestamp()
+                });
+                
+                e.target.reset(); 
+                handleProjectChange(""); 
+                switchTab('list');
+            } catch (err) {
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>Submit Report</span><i data-lucide="arrow-right" size="18"></i>`;
+                lucide.createIcons();
+            }
         });
+
+        // --- UI RENDERING ---
 
         window.handleProjectChange = (val) => {
             const bSel = document.getElementById('create-blockId');
             const p = systemSettings.projects.find(p => p.name === val);
-            if(p) { bSel.disabled = false; bSel.innerHTML = p.blocks.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join(''); }
-            else { bSel.disabled = true; bSel.innerHTML = '<option>Select Project First</option>'; }
+            if(p) { 
+                bSel.disabled = false; 
+                bSel.innerHTML = p.blocks.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join(''); 
+            } else { 
+                bSel.disabled = true; 
+                bSel.innerHTML = '<option>Select Project First</option>'; 
+            }
         };
 
         window.handleTechSelect = (s) => {
@@ -472,10 +532,20 @@
 
         function renderMainTable() {
             const body = document.getElementById('disputesTableBody');
+            const noData = document.getElementById('no-data');
+            
+            if (disputesData.length === 0) {
+                body.innerHTML = '';
+                noData.classList.remove('hidden');
+                lucide.createIcons();
+                return;
+            }
+            
+            noData.classList.add('hidden');
             body.innerHTML = disputesData.map(item => {
                 let statusColor = item.status === 'Resolved' ? "bg-emerald-100 text-emerald-700" : (item.status === 'Rejected' ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700");
                 return `
-                    <tr class="hover:bg-slate-50 border-b border-slate-50">
+                    <tr class="hover:bg-slate-50 border-b border-slate-50 fade-in">
                         <td class="px-6 py-4">
                             <div class="text-sm font-bold">${escapeHtml(item.project)}</div>
                             <div class="text-[10px] text-indigo-500 font-bold uppercase">${escapeHtml(item.blockId)}</div>
@@ -496,8 +566,8 @@
                         </td>
                         <td class="px-6 py-4 text-right admin-only ${window.isAdmin ? '' : 'hidden'}">
                             <div class="flex justify-end gap-1">
-                                <button onclick="updateStatus('${item.id}', 'Resolved')" class="h-8 w-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg"><i data-lucide="check" size="14"></i></button>
-                                <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" size="14"></i></button>
+                                <button onclick="updateStatus('${item.id}', 'Resolved')" class="h-8 w-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg" title="Resolve"><i data-lucide="check" size="14"></i></button>
+                                <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg" title="Delete"><i data-lucide="trash-2" size="14"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -542,48 +612,89 @@
             lucide.createIcons();
         }
 
-        // UI
+        // --- UI NAVIGATION ---
+
         window.toggleAdmin = () => {
-            if (window.isAdmin) { window.isAdmin = false; applyAdminState(); } 
-            else { document.getElementById('adminModal').classList.remove('hidden'); document.getElementById('adminPinInput').focus(); }
+            if (window.isAdmin) { 
+                window.isAdmin = false; 
+                applyAdminState(); 
+            } else { 
+                document.getElementById('adminModal').classList.remove('hidden'); 
+                document.getElementById('adminPinInput').focus(); 
+            }
         };
+
         window.verifyPin = () => {
-            if (document.getElementById('adminPinInput').value === '1234') { window.isAdmin = true; applyAdminState(); closeAdminModal(); }
-            else { alert("Incorrect PIN."); }
+            if (document.getElementById('adminPinInput').value === '1234') { 
+                window.isAdmin = true; 
+                applyAdminState(); 
+                closeAdminModal(); 
+            } else { 
+                alert("Incorrect PIN."); 
+            }
             document.getElementById('adminPinInput').value = '';
         };
+
         function applyAdminState() {
             const adminItems = document.querySelectorAll('.admin-only');
             const avatar = document.getElementById('userAvatar');
+            const badge = document.getElementById('adminBadge');
+
             if(window.isAdmin) {
-                avatar.innerText = 'AD'; avatar.classList.add('bg-red-50', 'text-red-600');
+                avatar.innerText = 'AD'; 
+                avatar.classList.add('bg-red-50', 'text-red-600');
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
                 document.getElementById('nav-settings').classList.remove('hidden');
                 adminItems.forEach(el => el.classList.remove('hidden'));
             } else {
-                avatar.innerText = 'US'; avatar.classList.remove('bg-red-50', 'text-red-600');
+                avatar.innerText = 'US'; 
+                avatar.classList.remove('bg-red-50', 'text-red-600');
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
                 document.getElementById('nav-settings').classList.add('hidden');
                 adminItems.forEach(el => el.classList.add('hidden'));
-                if(document.getElementById('pageTitle').innerText === 'System Settings') switchTab('list');
+                if(document.getElementById('pageTitle').innerText === 'Settings') switchTab('list');
             }
             renderMainTable();
         }
+
         window.switchTab = (tab) => {
             ['list', 'create', 'settings'].forEach(t => {
-                document.getElementById(`view-${t}`)?.classList.add('hidden');
-                document.getElementById(`nav-${t}`)?.classList.remove('bg-indigo-600', 'text-white');
+                const view = document.getElementById(`view-${t}`);
+                const nav = document.getElementById(`nav-${t}`);
+                if (view) view.classList.add('hidden');
+                if (nav) nav.classList.remove('bg-indigo-600', 'text-white');
             });
-            document.getElementById(`view-${tab}`)?.classList.remove('hidden');
-            document.getElementById(`nav-${tab}`)?.classList.add('bg-indigo-600', 'text-white');
-            document.getElementById('pageTitle').innerText = {list: 'Overview', create: 'New Dispute', settings: 'Settings'}[tab];
-            toggleSidebar(false); lucide.createIcons();
+            
+            const targetView = document.getElementById(`view-${tab}`);
+            const targetNav = document.getElementById(`nav-${tab}`);
+            
+            if (targetView) targetView.classList.remove('hidden');
+            if (targetNav) targetNav.classList.add('bg-indigo-600', 'text-white');
+            
+            document.getElementById('pageTitle').innerText = {list: 'Dashboard Overview', create: 'Report New Dispute', settings: 'System Settings'}[tab];
+            toggleSidebar(false); 
+            lucide.createIcons();
         };
+
         window.closeAdminModal = () => document.getElementById('adminModal').classList.add('hidden');
+        
         window.toggleSidebar = (s) => {
             const side = document.getElementById('sidebar');
-            if (s === false || !side.classList.contains('-translate-x-full')) { side.classList.add('-translate-x-full'); } 
-            else { side.classList.remove('-translate-x-full'); }
+            const overlay = document.getElementById('sidebarOverlay');
+            if (s === false || !side.classList.contains('-translate-x-full')) { 
+                side.classList.add('-translate-x-full'); 
+                overlay.classList.add('hidden');
+            } else { 
+                side.classList.remove('-translate-x-full'); 
+                overlay.classList.remove('hidden');
+            }
         };
-        function escapeHtml(t) { return t ? t.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : ''; }
+
+        function escapeHtml(t) { 
+            return t ? t.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : ''; 
+        }
     </script>
 </body>
 </html>
