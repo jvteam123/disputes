@@ -84,7 +84,7 @@
             <div id="loading" class="absolute inset-0 flex items-center justify-center bg-slate-50 z-20 transition-opacity duration-300">
                 <div class="flex flex-col items-center gap-4">
                     <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
-                    <span class="text-slate-400 text-sm font-medium">Loading Data...</span>
+                    <span class="text-slate-400 text-sm font-medium">Connecting to service...</span>
                 </div>
             </div>
 
@@ -249,294 +249,268 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Constants from environment
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // Safely parse configuration from environment
+        let firebaseConfig = {};
+        try {
+            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        } catch (e) {
+            console.error("Failed to parse firebase config", e);
+        }
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'dispute-mgr-v1';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // Ensure we have a config before initializing
+        if (!firebaseConfig.apiKey) {
+            console.warn("Firebase configuration is missing. Waiting for environment...");
+            document.getElementById('loading').innerHTML = `<div class="text-slate-500 p-4">Waiting for system environment...</div>`;
+        } else {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
 
-        let disputesData = [];
-        let systemSettings = { projects: [], techs: [] };
-        window.isAdmin = false;
+            let disputesData = [];
+            let systemSettings = { projects: [], techs: [] };
+            window.isAdmin = false;
 
-        // Initialization Logic (RULE 3: Auth Before Queries)
-        const init = async () => {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
+            // Initialization Logic (RULE 3: Auth Before Queries)
+            const init = async () => {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (err) {
+                    console.error("Auth initialization failed:", err);
+                    // Use standard sign-in if custom token fails
+                    try { await signInAnonymously(auth); } catch(e) {}
                 }
-            } catch (err) {
-                console.error("Auth initialization failed:", err);
-                document.getElementById('loading').innerHTML = `<div class="text-red-500 p-4 bg-red-50 border border-red-200 rounded-xl">Connection error. Please refresh.</div>`;
-            }
-        };
-
-        init();
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                startDataListeners(user.uid);
-            }
-        });
-
-        function startDataListeners(uid) {
-            // Guard every operation (Rule 3)
-            const handleSnapError = (err) => {
-                console.error("Firestore Error:", err);
-                // Optionally show a non-intrusive notification
             };
 
-            // Listen for Disputes
-            onSnapshot(
-                collection(db, 'artifacts', appId, 'public', 'data', 'disputes'), 
-                (snap) => {
-                    disputesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    disputesData.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-                    renderMainTable();
-                    document.getElementById('loading').classList.add('opacity-0', 'pointer-events-none');
-                },
-                handleSnapError
-            );
+            init();
 
-            // Listen for Settings
-            onSnapshot(
-                collection(db, 'artifacts', appId, 'public', 'data', 'projects'), 
-                (snap) => {
-                    systemSettings.projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    renderSettingsProjects();
-                    updateFormDropdowns();
-                },
-                handleSnapError
-            );
-
-            // Listen for Techs
-            onSnapshot(
-                collection(db, 'artifacts', appId, 'public', 'data', 'techs'), 
-                (snap) => {
-                    systemSettings.techs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    renderSettingsTechs();
-                    updateFormDropdowns();
-                },
-                handleSnapError
-            );
-        }
-
-        // --- ADMIN SETTINGS LOGIC ---
-
-        window.saveProjectConfig = async () => {
-            if (!auth.currentUser) return;
-            const name = document.getElementById('set-project-name').value.trim();
-            const blockString = document.getElementById('set-project-blocks').value.trim();
-            
-            if(!name || !blockString) return;
-
-            const blocks = blockString.split(',').map(b => b.trim()).filter(b => b.length > 0);
-
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'projects'), {
-                    name,
-                    blocks
-                });
-                document.getElementById('set-project-name').value = '';
-                document.getElementById('set-project-blocks').value = '';
-            } catch (err) {
-                console.error("Error saving project:", err);
-            }
-        };
-
-        window.saveTech = async () => {
-            if (!auth.currentUser) return;
-            const id = document.getElementById('new-tech-id').value.trim();
-            const name = document.getElementById('new-tech-name').value.trim();
-            if(!id || !name) return;
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'techs'), { techId: id, techName: name });
-                document.getElementById('new-tech-id').value = '';
-                document.getElementById('new-tech-name').value = '';
-            } catch (err) {
-                console.error("Error saving tech:", err);
-            }
-        };
-
-        window.removeDoc = async (col, docId) => {
-            if (!auth.currentUser) return;
-            if(confirm("Confirm deletion?")) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, docId));
-                } catch (err) {
-                    console.error("Error deleting doc:", err);
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    startDataListeners(user.uid);
                 }
+            });
+
+            function startDataListeners(uid) {
+                const handleSnapError = (err) => {
+                    console.error("Firestore Error:", err);
+                    if (err.code === 'permission-denied') {
+                        // Silent fail for now as the user might not have access to specific collections
+                    }
+                };
+
+                // Listen for Disputes
+                onSnapshot(
+                    collection(db, 'artifacts', appId, 'public', 'data', 'disputes'), 
+                    (snap) => {
+                        disputesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        disputesData.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+                        renderMainTable();
+                        document.getElementById('loading').classList.add('opacity-0', 'pointer-events-none');
+                    },
+                    handleSnapError
+                );
+
+                // Listen for Settings
+                onSnapshot(
+                    collection(db, 'artifacts', appId, 'public', 'data', 'projects'), 
+                    (snap) => {
+                        systemSettings.projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        renderSettingsProjects();
+                        updateFormDropdowns();
+                    },
+                    handleSnapError
+                );
+
+                // Listen for Techs
+                onSnapshot(
+                    collection(db, 'artifacts', appId, 'public', 'data', 'techs'), 
+                    (snap) => {
+                        systemSettings.techs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        renderSettingsTechs();
+                        updateFormDropdowns();
+                    },
+                    handleSnapError
+                );
             }
-        };
 
-        // --- FORM LOGIC ---
-
-        window.handleProjectChange = (projectName) => {
-            const blockSelect = document.getElementById('create-blockId');
-            if(!projectName) {
-                blockSelect.innerHTML = '<option value="">Select Project First</option>';
-                blockSelect.disabled = true;
-                return;
-            }
-
-            const project = systemSettings.projects.find(p => p.name === projectName);
-            if(project && project.blocks) {
-                blockSelect.disabled = false;
-                blockSelect.innerHTML = project.blocks.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
-            } else {
-                blockSelect.innerHTML = '<option value="">No Blocks Found</option>';
-                blockSelect.disabled = true;
-            }
-        };
-
-        window.handleTechSelect = (select) => {
-            const [id, name] = select.value.split('|');
-            document.querySelector('[name="techId"]').value = id || '';
-            document.querySelector('[name="techName"]').value = name || '';
-        };
-
-        function updateFormDropdowns() {
-            const pSel = document.getElementById('create-project');
-            const pVal = pSel.value;
-            pSel.innerHTML = '<option value="">Select Project</option>' + 
-                systemSettings.projects.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join('');
-            pSel.value = pVal;
-
-            const tSel = document.getElementById('create-tech');
-            const tVal = tSel.value;
-            tSel.innerHTML = '<option value="">Select Technician</option>' + 
-                systemSettings.techs.map(t => `<option value="${t.techId}|${t.techName}">${t.techId} - ${t.techName}</option>`).join('');
-            tSel.value = tVal;
-        }
-
-        // --- UI RENDERING ---
-
-        function renderMainTable() {
-            const body = document.getElementById('disputesTableBody');
-            if (!body) return;
-            body.innerHTML = disputesData.map(item => {
-                let statusColor = "bg-amber-100 text-amber-700 border-amber-200";
-                if(item.status === 'Resolved') statusColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
-                if(item.status === 'Rejected') statusColor = "bg-rose-100 text-rose-700 border-rose-200";
-
-                return `
-                    <tr class="hover:bg-slate-50 transition-colors group">
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-bold text-slate-800">${escapeHtml(item.project)}</div>
-                            <div class="text-[10px] text-indigo-500 font-black uppercase tracking-wider mt-0.5">${escapeHtml(item.blockId)}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="h-8 w-8 bg-slate-100 rounded-lg flex items-center justify-center text-[10px] font-bold text-slate-400 border border-slate-200">${escapeHtml(item.techId)}</div>
-                                <div class="text-sm font-medium text-slate-700">${escapeHtml(item.techName)}</div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black border uppercase tracking-widest ${statusColor}">${escapeHtml(item.status)}</span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">CAT: ${escapeHtml(item.category)} • ${escapeHtml(item.type)}</div>
-                            <div class="text-xs text-slate-600 max-w-xs truncate">${escapeHtml(item.reason)}</div>
-                        </td>
-                        <td class="px-6 py-4 text-right admin-only ${window.isAdmin ? '' : 'hidden'}">
-                            <div class="flex justify-end gap-1">
-                                <button onclick="updateStatus('${item.id}', 'Resolved')" class="h-8 w-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"><i data-lucide="check" size="16"></i></button>
-                                <button onclick="updateStatus('${item.id}', 'Rejected')" class="h-8 w-8 flex items-center justify-center text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><i data-lucide="x" size="16"></i></button>
-                                <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"><i data-lucide="trash-2" size="16"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-            lucide.createIcons();
-        }
-
-        function renderSettingsProjects() {
-            const list = document.getElementById('project-list');
-            if (!list) return;
-            document.getElementById('project-count').innerText = `${systemSettings.projects.length} TOTAL`;
+            // --- EXPOSE ACTIONS TO WINDOW ---
             
-            if(systemSettings.projects.length === 0) {
-                list.innerHTML = '<div class="p-12 text-center text-slate-300">No projects added yet.</div>';
-                return;
+            window.saveProjectConfig = async () => {
+                const name = document.getElementById('set-project-name').value.trim();
+                const blockString = document.getElementById('set-project-blocks').value.trim();
+                if(!name || !blockString || !auth.currentUser) return;
+                const blocks = blockString.split(',').map(b => b.trim()).filter(b => b.length > 0);
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'projects'), { name, blocks });
+                    document.getElementById('set-project-name').value = '';
+                    document.getElementById('set-project-blocks').value = '';
+                } catch (err) { console.error(err); }
+            };
+
+            window.saveTech = async () => {
+                const id = document.getElementById('new-tech-id').value.trim();
+                const name = document.getElementById('new-tech-name').value.trim();
+                if(!id || !name || !auth.currentUser) return;
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'techs'), { techId: id, techName: name });
+                    document.getElementById('new-tech-id').value = '';
+                    document.getElementById('new-tech-name').value = '';
+                } catch (err) { console.error(err); }
+            };
+
+            window.removeDoc = async (col, docId) => {
+                if (!auth.currentUser) return;
+                if(confirm("Confirm deletion?")) {
+                    try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, docId)); } 
+                    catch (err) { console.error(err); }
+                }
+            };
+
+            window.updateStatus = async (id, status) => {
+                if (!auth.currentUser) return;
+                try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disputes', id), { status }); } 
+                catch (err) { console.error(err); }
+            };
+
+            document.getElementById('createForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!auth.currentUser) return;
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                delete data.techData; 
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'disputes'), {
+                        ...data,
+                        status: 'Open',
+                        createdAt: serverTimestamp()
+                    });
+                    e.target.reset();
+                    handleProjectChange(""); 
+                    switchTab('list');
+                } catch (err) { console.error(err); } 
+                finally { btn.disabled = false; }
+            });
+
+            // Helpers for logic within scope
+            window.handleProjectChange = (projectName) => {
+                const blockSelect = document.getElementById('create-blockId');
+                if(!projectName) {
+                    blockSelect.innerHTML = '<option value="">Select Project First</option>';
+                    blockSelect.disabled = true;
+                    return;
+                }
+                const project = systemSettings.projects.find(p => p.name === projectName);
+                if(project && project.blocks) {
+                    blockSelect.disabled = false;
+                    blockSelect.innerHTML = project.blocks.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+                } else {
+                    blockSelect.innerHTML = '<option value="">No Blocks Found</option>';
+                    blockSelect.disabled = true;
+                }
+            };
+
+            window.handleTechSelect = (select) => {
+                const [id, name] = select.value.split('|');
+                document.querySelector('[name="techId"]').value = id || '';
+                document.querySelector('[name="techName"]').value = name || '';
+            };
+
+            function updateFormDropdowns() {
+                const pSel = document.getElementById('create-project');
+                const pVal = pSel.value;
+                pSel.innerHTML = '<option value="">Select Project</option>' + 
+                    systemSettings.projects.map(p => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`).join('');
+                pSel.value = pVal;
+
+                const tSel = document.getElementById('create-tech');
+                const tVal = tSel.value;
+                tSel.innerHTML = '<option value="">Select Technician</option>' + 
+                    systemSettings.techs.map(t => `<option value="${t.techId}|${t.techName}">${t.techId} - ${t.techName}</option>`).join('');
+                tSel.value = tVal;
             }
 
-            list.innerHTML = systemSettings.projects.map(p => `
-                <div class="p-4 flex items-start justify-between group hover:bg-slate-50 transition-all">
-                    <div class="flex-1">
-                        <h5 class="font-bold text-slate-800 text-sm mb-1">${escapeHtml(p.name)}</h5>
-                        <div class="flex flex-wrap gap-1">
-                            ${(p.blocks || []).map(b => `<span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-bold uppercase">${escapeHtml(b)}</span>`).join('')}
+            function renderMainTable() {
+                const body = document.getElementById('disputesTableBody');
+                if (!body) return;
+                body.innerHTML = disputesData.map(item => {
+                    let statusColor = item.status === 'Resolved' ? "bg-emerald-100 text-emerald-700 border-emerald-200" : 
+                                    (item.status === 'Rejected' ? "bg-rose-100 text-rose-700 border-rose-200" : "bg-amber-100 text-amber-700 border-amber-200");
+                    return `
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-bold text-slate-800">${escapeHtml(item.project)}</div>
+                                <div class="text-[10px] text-indigo-500 font-black uppercase tracking-wider mt-0.5">${escapeHtml(item.blockId)}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-8 w-8 bg-slate-100 rounded-lg flex items-center justify-center text-[10px] font-bold text-slate-400 border border-slate-200">${escapeHtml(item.techId)}</div>
+                                    <div class="text-sm font-medium text-slate-700">${escapeHtml(item.techName)}</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black border uppercase tracking-widest ${statusColor}">${escapeHtml(item.status)}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">CAT: ${escapeHtml(item.category)} • ${escapeHtml(item.type)}</div>
+                                <div class="text-xs text-slate-600 max-w-xs truncate">${escapeHtml(item.reason)}</div>
+                            </td>
+                            <td class="px-6 py-4 text-right admin-only ${window.isAdmin ? '' : 'hidden'}">
+                                <div class="flex justify-end gap-1">
+                                    <button onclick="updateStatus('${item.id}', 'Resolved')" class="h-8 w-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg"><i data-lucide="check" size="16"></i></button>
+                                    <button onclick="updateStatus('${item.id}', 'Rejected')" class="h-8 w-8 flex items-center justify-center text-rose-600 hover:bg-rose-50 rounded-lg"><i data-lucide="x" size="16"></i></button>
+                                    <button onclick="removeDoc('disputes', '${item.id}')" class="h-8 w-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" size="16"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                lucide.createIcons();
+            }
+
+            function renderSettingsProjects() {
+                const list = document.getElementById('project-list');
+                if (!list) return;
+                document.getElementById('project-count').innerText = `${systemSettings.projects.length} TOTAL`;
+                if(systemSettings.projects.length === 0) { list.innerHTML = '<div class="p-12 text-center text-slate-300">No projects added yet.</div>'; return; }
+                list.innerHTML = systemSettings.projects.map(p => `
+                    <div class="p-4 flex items-start justify-between group hover:bg-slate-50">
+                        <div class="flex-1">
+                            <h5 class="font-bold text-slate-800 text-sm mb-1">${escapeHtml(p.name)}</h5>
+                            <div class="flex flex-wrap gap-1">
+                                ${(p.blocks || []).map(b => `<span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-bold uppercase">${escapeHtml(b)}</span>`).join('')}
+                            </div>
                         </div>
+                        <button onclick="removeDoc('projects', '${p.id}')" class="p-2 text-slate-300 hover:text-red-500 transition-all"><i data-lucide="trash-2" size="16"></i></button>
                     </div>
-                    <button onclick="removeDoc('projects', '${p.id}')" class="p-2 text-slate-300 hover:text-red-500 transition-all">
-                        <i data-lucide="trash-2" size="16"></i>
-                    </button>
-                </div>
-            `).join('');
-            lucide.createIcons();
+                `).join('');
+                lucide.createIcons();
+            }
+
+            function renderSettingsTechs() {
+                const list = document.getElementById('tech-list');
+                if (!list) return;
+                list.innerHTML = systemSettings.techs.map(t => `
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-[10px] font-black text-indigo-500">${escapeHtml(t.techId)}</div>
+                            <span class="text-sm font-semibold text-slate-700">${escapeHtml(t.techName)}</span>
+                        </div>
+                        <button onclick="removeDoc('techs', '${t.id}')" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><i data-lucide="x" size="14"></i></button>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            }
         }
 
-        function renderSettingsTechs() {
-            const list = document.getElementById('tech-list');
-            if (!list) return;
-            list.innerHTML = systemSettings.techs.map(t => `
-                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between group">
-                    <div class="flex items-center gap-3">
-                        <div class="h-8 w-8 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-[10px] font-black text-indigo-500">${escapeHtml(t.techId)}</div>
-                        <span class="text-sm font-semibold text-slate-700">${escapeHtml(t.techName)}</span>
-                    </div>
-                    <button onclick="removeDoc('techs', '${t.id}')" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
-                        <i data-lucide="x" size="14"></i>
-                    </button>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        // --- CORE ACTIONS ---
-
-        window.updateStatus = async (id, status) => {
-            if (!auth.currentUser) return;
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'disputes', id), { status });
-            } catch (err) {
-                console.error("Error updating status:", err);
-            }
-        };
-
-        document.getElementById('createForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!auth.currentUser) return;
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            delete data.techData; 
-
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'disputes'), {
-                    ...data,
-                    status: 'Open',
-                    createdAt: serverTimestamp()
-                });
-                e.target.reset();
-                handleProjectChange(""); 
-                switchTab('list');
-            } catch (err) {
-                console.error("Error submitting dispute:", err);
-            } finally {
-                btn.disabled = false;
-            }
-        });
-
-        // --- TAB & ADMIN LOGIC ---
+        // --- GLOBAL UI HELPERS ---
 
         window.toggleAdmin = () => {
             if (window.isAdmin) { window.isAdmin = false; applyAdminState(); } 
@@ -555,24 +529,20 @@
             const badge = document.getElementById('adminBadge');
             const avatar = document.getElementById('userAvatar');
             const setNav = document.getElementById('nav-settings');
-
             if(window.isAdmin) {
-                badge.classList.remove('hidden');
-                badge.classList.add('flex');
+                badge.classList.replace('hidden', 'flex');
                 avatar.innerText = 'AD';
                 avatar.classList.add('bg-red-50', 'text-red-600', 'border-red-100');
                 setNav.classList.remove('hidden');
                 adminItems.forEach(el => el.classList.remove('hidden'));
             } else {
-                badge.classList.add('hidden');
-                badge.classList.remove('flex');
+                badge.classList.replace('flex', 'hidden');
                 avatar.innerText = 'US';
                 avatar.classList.remove('bg-red-50', 'text-red-600', 'border-red-100');
                 setNav.classList.add('hidden');
                 adminItems.forEach(el => el.classList.add('hidden'));
                 if(document.getElementById('pageTitle').innerText === 'System Settings') switchTab('list');
             }
-            renderMainTable();
         }
 
         window.switchTab = (tab) => {
