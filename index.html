@@ -178,13 +178,19 @@
                             Dispute Entry Form
                         </h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Project Name</label>
-                                <select name="project" id="create-project" required onchange="handleProjectChange(this.value)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Project Name</label>
+                                    <select name="project" id="create-project" required onchange="handleProjectChange(this.value)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
+                                </div>
+                                <div id="custom-project-container" class="hidden fade-in">
+                                    <label class="block text-[10px] font-black text-indigo-400 uppercase mb-2">New Project Name</label>
+                                    <input type="text" id="custom-project-name" placeholder="Enter name..." class="w-full px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-xl text-sm outline-none">
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Block ID</label>
-                                <input type="text" name="blockId" id="create-blockId" readonly class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500 outline-none">
+                                <input type="text" name="blockId" id="create-blockId" placeholder="N/A" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Technician</label>
@@ -628,17 +634,61 @@
         document.getElementById('createForm').onsubmit = async (e) => {
             e.preventDefault();
             const data = Object.fromEntries(new FormData(e.target).entries());
+            
+            // Handle custom project addition
+            if (data.project === "__add_new__") {
+                const customName = document.getElementById('custom-project-name').value.trim();
+                if (!customName) {
+                    alert("Please enter a project name.");
+                    return;
+                }
+                data.project = customName;
+                // Silently add to the permanent list for future use
+                await addItem('projects', { name: customName, blockId: data.blockId || "N/A" });
+            }
+
             delete data.techData;
             await addDoc(getCollectionPath('disputes'), { ...data, status: 'Open', createdAt: serverTimestamp() });
-            e.target.reset(); switchTab('list');
+            
+            // Clean up custom project UI if active
+            document.getElementById('custom-project-container').classList.add('hidden');
+            document.getElementById('create-blockId').readOnly = true;
+            
+            e.target.reset(); 
+            switchTab('list');
+            showToast("Dispute Submitted!");
         };
 
-        window.handleProjectChange = (v) => { const p = systemSettings.projects.find(x => x.name === v); document.getElementById('create-blockId').value = p ? p.blockId : ""; };
+        window.handleProjectChange = (v) => { 
+            const customContainer = document.getElementById('custom-project-container');
+            const blockInput = document.getElementById('create-blockId');
+            
+            if (v === "__add_new__") {
+                customContainer.classList.remove('hidden');
+                blockInput.readOnly = false;
+                blockInput.value = "";
+                blockInput.focus();
+            } else {
+                customContainer.classList.add('hidden');
+                blockInput.readOnly = true;
+                const p = systemSettings.projects.find(x => x.name === v); 
+                blockInput.value = p ? p.blockId : ""; 
+            }
+        };
+        
         window.handleTechSelect = (s) => { const [id, name] = s.value.split('|'); document.querySelector('[name="techId"]').value = id || ''; document.querySelector('[name="techName"]').value = name || ''; };
         
         function updateFormDropdowns() {
             const fill = (id, data, key) => { const el = document.getElementById(id); if (el) el.innerHTML = '<option value="">Select Option</option>' + data.map(d => `<option value="${d[key]}">${d[key]}</option>`).join(''); };
-            fill('create-project', systemSettings.projects, 'name');
+            
+            // Projects gets a special "Add New" option
+            const projEl = document.getElementById('create-project');
+            if (projEl) {
+                projEl.innerHTML = '<option value="">Select Project</option>' + 
+                                  systemSettings.projects.map(p => `<option value="${p.name}">${p.name}</option>`).join('') +
+                                  '<optgroup label="Missing Project?"><option value="__add_new__">+ Add New Project Name</option></optgroup>';
+            }
+
             fill('create-team', systemSettings.teams, 'name');
             fill('create-rqa-tech', systemSettings.rqaTechs, 'rqaId');
             const techEl = document.getElementById('create-tech');
