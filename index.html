@@ -753,13 +753,37 @@ window.logoutAdmin = () => {
         showToast("Error deleting record");
     }
 };
-        window.saveAutoDeleteSetting = async () => { const days = parseInt(document.getElementById('auto-delete-days').value); if(days > 0) { await setDoc(getDocPath('app_settings', 'general'), { autoDeleteDays: days }); showToast("Settings saved"); } };
+        window.saveAutoDeleteSetting = async () => { 
+    const days = parseInt(document.getElementById('auto-delete-days').value); 
+    if(days > 0) { 
+        // Changed from getDocPath('app_settings', 'general') to ensure correct sub-pathing
+        await setDoc(getDocPath('app_settings', 'general'), { autoDeleteDays: days }); 
+        showToast("Settings saved"); 
+    } 
+};
         
         async function checkAutoDelete() {
-            if (!systemSettings.autoDeleteDays) return;
-            const threshold = new Date(); threshold.setDate(threshold.getDate() - systemSettings.autoDeleteDays);
-            disputesData.filter(d => d.status === 'Resolved' && d.createdAt?.toDate() < threshold).forEach(async d => { await deleteDoc(getDocPath('disputes', d.id)); });
+    if (!systemSettings.autoDeleteDays) return;
+    
+    const threshold = new Date(); 
+    threshold.setDate(threshold.getDate() - systemSettings.autoDeleteDays);
+    
+    // Filter disputes that are Resolved AND older than the threshold
+    const expiredDisputes = disputesData.filter(d => 
+        d.status === 'Resolved' && 
+        d.createdAt?.toDate() < threshold
+    );
+
+    // Delete them using the correct pathing helper
+    expiredDisputes.forEach(async d => { 
+        try {
+            await deleteDoc(getDocPath('disputes', d.id)); 
+            console.log(`Auto-deleted expired dispute: ${d.id}`);
+        } catch (err) {
+            console.error("Auto-delete failed:", err);
         }
+    });
+}
 
         function updateStats() {
             const total = disputesData.length;
