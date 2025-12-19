@@ -41,7 +41,6 @@
 </head>
 <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex font-sans">
 
-    <!-- Sidebar (Original Structure + Leave) -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 flex flex-col shadow-2xl">
         <div class="p-6 flex items-center justify-between border-b border-slate-800/50">
             <div class="flex items-center gap-2 font-bold text-xl">
@@ -62,7 +61,6 @@
                 <i data-lucide="file-plus" size="20"></i>
                 <span class="font-medium">New Dispute</span>
             </button>
-            <!-- NEW LEAVE FEATURE -->
             <button onclick="switchTab('leave')" id="nav-leave" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
                 <i data-lucide="calendar-days" size="20"></i>
                 <span class="font-medium">Leave Scheduler</span>
@@ -111,7 +109,6 @@
                 </div>
             </div>
 
-            <!-- Dashboard View (Original) -->
             <div id="view-list" class="fade-in space-y-6">
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
@@ -174,10 +171,8 @@
                 </div>
             </div>
 
-            <!-- Leave Scheduler View (NEW) -->
             <div id="view-leave" class="hidden fade-in max-w-6xl mx-auto pb-10 space-y-8">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Leave Form -->
                     <div class="lg:col-span-1">
                         <form id="leaveForm" class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
                             <div class="p-6 space-y-4">
@@ -218,20 +213,19 @@
                         </form>
                     </div>
 
-                    <!-- Leave List -->
                     <div class="lg:col-span-2 space-y-4">
                         <h3 class="text-xl font-bold text-slate-800">Recent Leave Requests</h3>
                         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                             <table class="w-full text-left border-collapse">
                                 <thead class="bg-slate-50 border-b border-slate-200 text-[10px] uppercase text-slate-400 font-bold tracking-widest">
-    <tr>
-        <th class="px-6 py-4">Technician</th>
-        <th class="px-6 py-4">Type / Dates</th>
-        <th class="px-6 py-4">Reason</th> 
-        <th class="px-6 py-4">Status</th>
-        <th class="px-6 py-4 text-right">Admin</th>
-    </tr>
-</thead>
+                                    <tr>
+                                        <th class="px-6 py-4">Technician</th>
+                                        <th class="px-6 py-4">Type / Dates</th>
+                                        <th class="px-6 py-4">Reason</th> 
+                                        <th class="px-6 py-4">Status</th>
+                                        <th class="px-6 py-4 text-right">Admin</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="leaveTableBody" class="divide-y divide-slate-100"></tbody>
                             </table>
                         </div>
@@ -239,7 +233,6 @@
                 </div>
             </div>
 
-            <!-- Create View (Original) -->
             <div id="view-create" class="hidden fade-in max-w-4xl mx-auto pb-10">
                 <form id="createForm" class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
                     <div class="p-6 md:p-10 space-y-6">
@@ -324,7 +317,6 @@
                 </form>
             </div>
 
-            <!-- Settings View (Original Layout) -->
             <div id="view-settings" class="hidden fade-in max-w-6xl mx-auto space-y-8 pb-10">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="trash-2" size="18" class="text-indigo-500"></i> Auto-Maintenance</h3>
@@ -380,7 +372,6 @@
         </main>
     </div>
 
-    <!-- Modals (Original) -->
     <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/80 z-[80] flex items-center justify-center p-4">
         <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm text-center">
             <h3 class="text-xl font-bold mb-6">Admin Verification</h3>
@@ -392,7 +383,6 @@
         </div>
     </div>
 
-    <!-- Details Modal (RESTORED TO ORIGINAL WITH COPY ICONS) -->
     <div id="detailsModal" class="hidden fixed inset-0 bg-slate-900/80 z-[70] flex items-center justify-center p-4">
         <div class="bg-white rounded-[2rem] max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
             <div id="modalHeader" class="p-6 bg-slate-50 border-b flex justify-between items-center">
@@ -413,8 +403,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAzcrNsEZKka6SBEC-plnydGJKTaiR9Sk0",
@@ -463,7 +453,10 @@
                 onSnapshot(getCollectionPath(col), snap => {
                     if (col === 'app_settings') {
                         const settingsDoc = snap.docs.find(d => d.id === 'general');
-                        if (settingsDoc) systemSettings.autoDeleteDays = settingsDoc.data().autoDeleteDays || 7;
+                        if (settingsDoc) {
+                            systemSettings.autoDeleteDays = settingsDoc.data().autoDeleteDays || 7;
+                            document.getElementById('auto-delete-days').value = systemSettings.autoDeleteDays;
+                        }
                         return;
                     }
                     const key = col === 'rqatechs' ? 'rqaTechs' : col;
@@ -478,11 +471,16 @@
             const body = document.getElementById('disputesTableBody');
             const search = document.getElementById('searchInput').value.toLowerCase();
             const filter = document.getElementById('filterStatus').value;
+            
             const filtered = disputesData.filter(d => {
-                const matches = !search || d.techName?.toLowerCase().includes(search) || d.project?.toLowerCase().includes(search) || d.fpUid?.toLowerCase().includes(search);
+                const tech = (d.techName || "").toLowerCase();
+                const proj = (d.project || "").toLowerCase();
+                const uid = (d.fpUid || "").toLowerCase();
+                const matchesSearch = !search || tech.includes(search) || proj.includes(search) || uid.includes(search);
                 const matchesFilter = filter === 'All' || d.status === filter;
-                return matches && matchesFilter;
+                return matchesSearch && matchesFilter;
             });
+
             document.getElementById('no-data').classList.toggle('hidden', filtered.length > 0);
             body.innerHTML = filtered.map(item => `
                 <tr class="hover:bg-slate-50 transition-colors cursor-pointer group" onclick="showDetails('${item.id}')">
@@ -504,44 +502,23 @@
             lucide.createIcons();
         };
 
-        // --- BULK ACTION FUNCTIONS ---
+        window.bulkDelete = async () => {
+            const ids = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value);
+            if (ids.length === 0) return showToast("No items selected");
+            if (!confirm(`Delete ${ids.length} selected records?`)) return;
 
-window.bulkDelete = async () => {
-    // Finds all checkboxes that are currently checked
-    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-    const idsToDelete = Array.from(checkedBoxes).map(cb => cb.value);
+            try {
+                await Promise.all(ids.map(id => deleteDoc(getDocPath('disputes', id))));
+                showToast(`${ids.length} records deleted`);
+                document.getElementById('selectAll').checked = false;
+            } catch (e) { showToast("Error during deletion"); }
+        };
 
-    if (idsToDelete.length === 0) {
-        showToast("No items selected");
-        return;
-    }
+        window.toggleSelectAll = (source) => {
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = source.checked);
+        };
 
-    if (!confirm(`Are you sure you want to delete ${idsToDelete.length} selected disputes?`)) return;
-
-    try {
-        // Uses your getDocPath helper to ensure the correct Firebase sub-collection path
-        const deletePromises = idsToDelete.map(id => deleteDoc(getDocPath('disputes', id)));
-        await Promise.all(deletePromises);
-        
-        showToast(`${idsToDelete.length} records deleted`);
-        
-        // Reset the "Select All" checkbox header
-        const selectAllBox = document.getElementById('selectAll');
-        if (selectAllBox) selectAllBox.checked = false;
-    } catch (e) {
-        console.error("Bulk delete error:", e);
-        showToast("Error during bulk deletion");
-    }
-};
-
-window.toggleSelectAll = (source) => {
-    // Selects or deselects all row checkboxes based on the header checkbox state
-    const checkboxes = document.querySelectorAll('.row-checkbox');
-    checkboxes.forEach(cb => cb.checked = source.checked);
-};
-
-        // --- ORIGINAL DETAILS LOGIC WITH COPY ICONS ---
-          window.showDetails = (id) => {
+        window.showDetails = (id) => {
             const d = disputesData.find(x => x.id === id);
             if (!d) return;
             
@@ -588,33 +565,22 @@ window.toggleSelectAll = (source) => {
 
             window.currentDispute = d;
             const adminActions = document.getElementById('adminActions');
-           adminActions.innerHTML = window.isAdmin ? `
-    <button onclick="deleteDocItem('disputes', '${d.id}')" 
-            class="px-4 py-2.5 bg-red-50 text-red-600 font-bold text-xs rounded-xl hover:bg-red-100 transition-colors">
-        Delete
-    </button>
-    <div class="flex gap-2">
-        <button onclick="updateStatus('${d.id}', 'Rejected')" 
-                class="px-4 py-2.5 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl">
-            Reject
-        </button>
-        <button onclick="updateStatus('${d.id}', 'Resolved')" 
-                class="px-6 py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md">
-            Resolve
-        </button>
-    </div>
-` : `<button onclick="closeDetailsModal()" class="px-8 py-2.5 bg-indigo-600 text-white font-bold text-sm rounded-xl">Close</button>`;
+            adminActions.innerHTML = window.isAdmin ? `
+                <button onclick="deleteDocItem('disputes', '${d.id}')" class="px-4 py-2.5 bg-red-50 text-red-600 font-bold text-xs rounded-xl hover:bg-red-100 transition-colors">Delete</button>
+                <div class="flex gap-2">
+                    <button onclick="updateStatus('${d.id}', 'Rejected')" class="px-4 py-2.5 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl">Reject</button>
+                    <button onclick="updateStatus('${d.id}', 'Resolved')" class="px-6 py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md">Resolve</button>
+                </div>
+            ` : `<button onclick="closeDetailsModal()" class="px-8 py-2.5 bg-indigo-600 text-white font-bold text-sm rounded-xl">Close</button>`;
             
             document.getElementById('detailsModal').classList.remove('hidden');
             lucide.createIcons();
         };
 
         window.copyText = (text) => {
-            const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
-            showToast("Copied to clipboard!");
+            navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard!"));
         };
 
-        // --- LEAVE SCHEDULER ---
         window.handleLeaveTechSelect = (s) => { 
             const [id, name] = s.value.split('|'); 
             document.querySelector('#leaveForm [name="techId"]').value = id || ''; 
@@ -626,62 +592,79 @@ window.toggleSelectAll = (source) => {
             const data = Object.fromEntries(new FormData(e.target).entries());
             delete data.techData;
             await addDoc(getCollectionPath('leaves'), { ...data, status: 'Pending', createdAt: serverTimestamp() });
-            e.target.reset(); showToast("Leave request filed!");
+            e.target.reset(); 
+            // Reset hidden fields manually
+            document.querySelector('#leaveForm [name="techId"]').value = "";
+            document.querySelector('#leaveForm [name="techName"]').value = "";
+            showToast("Leave request filed!");
         };
 
         window.renderLeaveTable = () => {
-    const body = document.getElementById('leaveTableBody');
-    body.innerHTML = leavesData.map(item => `
-        <tr class="hover:bg-slate-50 transition-colors">
-            <td class="px-6 py-4">
-                <div class="text-sm font-bold text-slate-800">${escapeHtml(item.techName)}</div>
-                <div class="text-[10px] text-slate-400 font-black">${escapeHtml(item.techId)}</div>
-            </td>
-            <td class="px-6 py-4">
-                <div class="text-xs font-bold text-indigo-600">${escapeHtml(item.leaveType)}</div>
-                <div class="text-[10px] text-slate-500">${item.startDate} to ${item.endDate}</div>
-            </td>
-            <td class="px-6 py-4">
-                <div class="text-[10px] text-slate-600 max-w-[150px] truncate" title="${escapeHtml(item.reason || '')}">
-                    ${escapeHtml(item.reason || 'No reason provided')}
-                </div>
-            </td>
-            <td class="px-6 py-4">
-                <span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${getStatusClass(item.status)}">${item.status}</span>
-            </td>
-            <td class="px-6 py-4 text-right">
-                ${window.isAdmin && item.status === 'Pending' ? `
-                    <div class="flex justify-end gap-1">
-                        <button onclick="updateLeaveStatus('${item.id}', 'Approved')" class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100"><i data-lucide="check" size="14"></i></button>
-                        <button onclick="updateLeaveStatus('${item.id}', 'Rejected')" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"><i data-lucide="x" size="14"></i></button>
-                    </div>
-                ` : window.isAdmin ? `<button onclick="deleteLeave('${item.id}')" class="text-slate-300 hover:text-red-400"><i data-lucide="trash-2" size="14"></i></button>` : `<i data-lucide="lock" size="14" class="text-slate-200 ml-auto"></i>`}
-            </td>
-        </tr>
-    `).join('');
-    lucide.createIcons();
-};
+            const body = document.getElementById('leaveTableBody');
+            body.innerHTML = leavesData.map(item => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-bold text-slate-800">${escapeHtml(item.techName)}</div>
+                        <div class="text-[10px] text-slate-400 font-black">${escapeHtml(item.techId)}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-xs font-bold text-indigo-600">${escapeHtml(item.leaveType)}</div>
+                        <div class="text-[10px] text-slate-500">${item.startDate} to ${item.endDate}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-[10px] text-slate-600 max-w-[150px] truncate" title="${escapeHtml(item.reason || '')}">
+                            ${escapeHtml(item.reason || 'No reason provided')}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${getStatusClass(item.status)}">${item.status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        ${window.isAdmin && item.status === 'Pending' ? `
+                            <div class="flex justify-end gap-1">
+                                <button onclick="updateLeaveStatus('${item.id}', 'Approved')" class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100"><i data-lucide="check" size="14"></i></button>
+                                <button onclick="updateLeaveStatus('${item.id}', 'Rejected')" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"><i data-lucide="x" size="14"></i></button>
+                            </div>
+                        ` : window.isAdmin ? `<button onclick="deleteLeave('${item.id}')" class="text-slate-300 hover:text-red-400"><i data-lucide="trash-2" size="14"></i></button>` : `<i data-lucide="lock" size="14" class="text-slate-200 ml-auto"></i>`}
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        };
 
         window.updateLeaveStatus = async (id, status) => { await updateDoc(getDocPath('leaves', id), { status }); showToast(`Leave ${status}`); };
         window.deleteLeave = async (id) => { if(confirm("Delete request?")) await deleteDoc(getDocPath('leaves', id)); };
 
-        // --- REST OF CORE FUNCTIONS ---
         window.switchTab = (tab) => {
             ['list', 'create', 'leave', 'settings'].forEach(t => { 
-                document.getElementById(`view-${t}`)?.classList.add('hidden'); 
-                document.getElementById(`nav-${t}`)?.classList.remove('bg-indigo-600', 'text-white'); 
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden'); 
+                const nav = document.getElementById(`nav-${t}`);
+                if (nav) nav.classList.remove('bg-indigo-600', 'text-white'); 
             });
-            document.getElementById(`view-${tab}`)?.classList.remove('hidden'); 
-            document.getElementById(`nav-${tab}`)?.classList.add('bg-indigo-600', 'text-white');
+            const view = document.getElementById(`view-${tab}`);
+            if (view) view.classList.remove('hidden'); 
+            const nav = document.getElementById(`nav-${tab}`);
+            if (nav) nav.classList.add('bg-indigo-600', 'text-white');
             document.getElementById('pageTitle').innerText = tab === 'leave' ? 'Leave Scheduler' : tab.charAt(0).toUpperCase() + tab.slice(1);
             toggleSidebar(false); 
             lucide.createIcons();
         };
 
-        window.toggleAdmin = () => { if (window.isAdmin) { window.isAdmin = false; applyAdminState(); } else { document.getElementById('adminModal').classList.remove('hidden'); } };
-        window.verifyPin = () => { if (document.getElementById('adminPinInput').value === systemSettings.adminPin) { window.isAdmin = true; applyAdminState(); document.getElementById('adminModal').classList.add('hidden'); } else { showToast('Invalid PIN'); } document.getElementById('adminPinInput').value = ''; };
+        window.toggleAdmin = () => { if (window.isAdmin) { logoutAdmin(); } else { document.getElementById('adminModal').classList.remove('hidden'); } };
+        window.verifyPin = () => { 
+            if (document.getElementById('adminPinInput').value === systemSettings.adminPin) { 
+                window.isAdmin = true; 
+                applyAdminState(); 
+                document.getElementById('adminModal').classList.add('hidden'); 
+                showToast("Admin Access Granted");
+            } else { 
+                showToast('Invalid PIN'); 
+            } 
+            document.getElementById('adminPinInput').value = ''; 
+        };
         
-window.logoutAdmin = () => {
+        window.logoutAdmin = () => {
             window.isAdmin = false;
             applyAdminState();
             switchTab('list');
@@ -696,7 +679,7 @@ window.logoutAdmin = () => {
         }
 
         window.updateStatus = async (id, s) => { await updateDoc(getDocPath('disputes', id), { status: s }); closeDetailsModal(); showToast(`Dispute ${s}`); };
-        window.deleteDispute = async (id) => { if(confirm("Delete record?")) { await deleteDoc(getDocPath('disputes', id)); closeDetailsModal(); showToast("Deleted"); }};
+        window.deleteDocItem = async (col, id) => { if(confirm(`Delete this ${col}?`)) { await deleteDoc(getDocPath(col, id)); if(col==='disputes') closeDetailsModal(); showToast("Deleted"); }};
 
         window.copyAllDetails = () => {
             const d = window.currentDispute;
@@ -711,7 +694,11 @@ window.logoutAdmin = () => {
             else { custom.classList.add('hidden'); block.readOnly = true; const p = systemSettings.projects.find(x => x.name === v); block.value = p ? p.blockId : ""; }
         };
 
-        window.handleTechSelect = (s) => { const [id, name] = s.value.split('|'); document.querySelector('#createForm [name="techId"]').value = id || ''; document.querySelector('#createForm [name="techName"]').value = name || ''; };
+        window.handleTechSelect = (s) => { 
+            const [id, name] = s.value.split('|'); 
+            document.querySelector('#createForm [name="techId"]').value = id || ''; 
+            document.querySelector('#createForm [name="techName"]').value = name || ''; 
+        };
 
         document.getElementById('createForm').onsubmit = async (e) => {
             e.preventDefault();
@@ -724,7 +711,12 @@ window.logoutAdmin = () => {
             }
             delete data.techData;
             await addDoc(getCollectionPath('disputes'), { ...data, status: 'Open', createdAt: serverTimestamp() });
-            e.target.reset(); switchTab('list'); showToast("Submitted!");
+            e.target.reset(); 
+            document.getElementById('create-blockId').value = "";
+            document.getElementById('custom-project-container').classList.add('hidden');
+            document.querySelector('#createForm [name="techId"]').value = "";
+            document.querySelector('#createForm [name="techName"]').value = "";
+            switchTab('list'); showToast("Submitted!");
         };
 
         function updateFormDropdowns() {
@@ -739,87 +731,52 @@ window.logoutAdmin = () => {
         }
 
         window.renderManagementList = (col, data) => {
-    const idMap = { 'projects': 'list-projects', 'techs': 'list-techs', 'teams': 'list-teams', 'rqatechs': 'list-rqatechs' };
-    const el = document.getElementById(idMap[col]); 
-    if (!el) return;
-
-    el.innerHTML = data.map(d => `
-        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 mb-2 hover:border-indigo-200 transition-all overflow-hidden">
-            <div class="flex flex-col min-w-0 flex-1 mr-2">
-                <span class="text-[10px] font-black text-slate-800 uppercase tracking-tight truncate">
-                    ${escapeHtml(d.name || d.techName || d.rqaId)}
-                </span>
-                ${d.blockId ? `<span class="text-[9px] text-slate-400 font-bold truncate">Block: ${d.blockId}</span>` : ''}
-            </div>
-            <button onclick="deleteDocItem('${col}', '${d.id}')" class="shrink-0 text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors">
-                <i data-lucide="trash-2" size="14"></i>
-            </button>
-        </div>
-    `).join('');
-
-    lucide.createIcons();
-};
+            const idMap = { 'projects': 'list-projects', 'techs': 'list-techs', 'teams': 'list-teams', 'rqatechs': 'list-rqatechs' };
+            const el = document.getElementById(idMap[col]); 
+            if (!el) return;
+            el.innerHTML = data.map(d => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 mb-2 hover:border-indigo-200 transition-all">
+                    <div class="flex flex-col min-w-0 flex-1 mr-2">
+                        <span class="text-[10px] font-black text-slate-800 uppercase truncate">${escapeHtml(d.name || d.techName || d.rqaId)}</span>
+                        ${d.blockId ? `<span class="text-[9px] text-slate-400 font-bold">Block: ${d.blockId}</span>` : ''}
+                    </div>
+                    <button onclick="deleteDocItem('${col}', '${d.id}')" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" size="14"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        };
 
         window.addItem = async (col, data) => { 
             if (Object.values(data).some(v => !v)) return showToast("Missing fields");
             await addDoc(getCollectionPath(col), data); 
             showToast("Added!");
-            // Clear inputs based on col type
             if(col === 'projects') { document.getElementById('new-proj-name').value=''; document.getElementById('new-proj-block').value=''; }
             if(col === 'techs') { document.getElementById('new-tech-name').value=''; document.getElementById('new-tech-id').value=''; }
             if(col === 'teams') document.getElementById('new-team-name').value='';
             if(col === 'rqatechs') document.getElementById('new-rqa-id').value='';
         };
 
-        window.deleteDocItem = async (col, id) => {
-    if (!confirm(`Are you sure you want to delete this ${col.slice(0, -1)}?`)) return;
-
-    try {
-        // Use your existing getDocPath helper to point to the correct Firebase location
-        await deleteDoc(getDocPath(col, id));
-        
-        showToast("Record deleted successfully");
-        
-        // If we are deleting a dispute from within the Review Modal, close it
-        if (col === 'disputes') {
-            closeDetailsModal();
-        }
-    } catch (e) {
-        console.error("Error deleting document: ", e);
-        showToast("Error deleting record");
-    }
-};
         window.saveAutoDeleteSetting = async () => { 
-    const days = parseInt(document.getElementById('auto-delete-days').value); 
-    if(days > 0) { 
-        // Changed from getDocPath('app_settings', 'general') to ensure correct sub-pathing
-        await setDoc(getDocPath('app_settings', 'general'), { autoDeleteDays: days }); 
-        showToast("Settings saved"); 
-    } 
-};
+            const days = parseInt(document.getElementById('auto-delete-days').value); 
+            if(days > 0) { 
+                await setDoc(getDocPath('app_settings', 'general'), { autoDeleteDays: days }); 
+                showToast("Settings saved"); 
+            } 
+        };
         
         async function checkAutoDelete() {
-    if (!systemSettings.autoDeleteDays) return;
-    
-    const threshold = new Date(); 
-    threshold.setDate(threshold.getDate() - systemSettings.autoDeleteDays);
-    
-    // Filter disputes that are Resolved AND older than the threshold
-    const expiredDisputes = disputesData.filter(d => 
-        d.status === 'Resolved' && 
-        d.createdAt?.toDate() < threshold
-    );
+            if (!systemSettings.autoDeleteDays) return;
+            const threshold = new Date(); 
+            threshold.setDate(threshold.getDate() - systemSettings.autoDeleteDays);
+            
+            const expired = disputesData.filter(d => 
+                d.status === 'Resolved' && 
+                d.createdAt && typeof d.createdAt.toDate === 'function' && 
+                d.createdAt.toDate() < threshold
+            );
 
-    // Delete them using the correct pathing helper
-    expiredDisputes.forEach(async d => { 
-        try {
-            await deleteDoc(getDocPath('disputes', d.id)); 
-            console.log(`Auto-deleted expired dispute: ${d.id}`);
-        } catch (err) {
-            console.error("Auto-delete failed:", err);
+            expired.forEach(async d => { try { await deleteDoc(getDocPath('disputes', d.id)); } catch (err) {} });
         }
-    });
-}
 
         function updateStats() {
             const total = disputesData.length;
