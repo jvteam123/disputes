@@ -504,6 +504,42 @@
             lucide.createIcons();
         };
 
+        // --- BULK ACTION FUNCTIONS ---
+
+window.bulkDelete = async () => {
+    // Finds all checkboxes that are currently checked
+    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+    const idsToDelete = Array.from(checkedBoxes).map(cb => cb.value);
+
+    if (idsToDelete.length === 0) {
+        showToast("No items selected");
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to delete ${idsToDelete.length} selected disputes?`)) return;
+
+    try {
+        // Uses your getDocPath helper to ensure the correct Firebase sub-collection path
+        const deletePromises = idsToDelete.map(id => deleteDoc(getDocPath('disputes', id)));
+        await Promise.all(deletePromises);
+        
+        showToast(`${idsToDelete.length} records deleted`);
+        
+        // Reset the "Select All" checkbox header
+        const selectAllBox = document.getElementById('selectAll');
+        if (selectAllBox) selectAllBox.checked = false;
+    } catch (e) {
+        console.error("Bulk delete error:", e);
+        showToast("Error during bulk deletion");
+    }
+};
+
+window.toggleSelectAll = (source) => {
+    // Selects or deselects all row checkboxes based on the header checkbox state
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+};
+
         // --- ORIGINAL DETAILS LOGIC WITH COPY ICONS ---
           window.showDetails = (id) => {
             const d = disputesData.find(x => x.id === id);
