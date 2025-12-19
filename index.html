@@ -215,6 +215,7 @@
                               <tr>
                                  <th class="px-6 py-4">Technician</th>
                                  <th class="px-6 py-4">Type / Dates</th>
+                                 <th class="px-6 py-4">Reason</th>
                                  <th class="px-6 py-4">Status</th>
                                  <th class="px-6 py-4 text-right">Admin</th>
                               </tr>
@@ -575,31 +576,36 @@
          };
          
          window.renderLeaveTable = () => {
-             const body = document.getElementById('leaveTableBody');
-             body.innerHTML = leavesData.map(item => `
-                 <tr class="hover:bg-slate-50 transition-colors">
-                     <td class="px-6 py-4">
-                         <div class="text-sm font-bold text-slate-800">${escapeHtml(item.techName)}</div>
-                         <div class="text-[10px] text-slate-400 font-black">${escapeHtml(item.techId)}</div>
-                     </td>
-                     <td class="px-6 py-4">
-                         <div class="text-xs font-bold text-indigo-600">${escapeHtml(item.leaveType)}</div>
-                         <div class="text-[10px] text-slate-500">${item.startDate} to ${item.endDate}</div>
-                     </td>
-                     <td class="px-6 py-4">
-                         <span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${getStatusClass(item.status)}">${item.status}</span>
-                     </td>
-                     <td class="px-6 py-4 text-right">
-                         ${window.isAdmin && item.status === 'Pending' ? `
-                             <div class="flex justify-end gap-1">
-                                 <button onclick="updateLeaveStatus('${item.id}', 'Approved')" class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100"><i data-lucide="check" size="14"></i></button>
-                                 <button onclick="updateLeaveStatus('${item.id}', 'Rejected')" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"><i data-lucide="x" size="14"></i></button>
-                             </div>
-                         ` : window.isAdmin ? `<button onclick="deleteLeave('${item.id}')" class="text-slate-300 hover:text-red-400"><i data-lucide="trash-2" size="14"></i></button>` : `<i data-lucide="lock" size="14" class="text-slate-200 ml-auto"></i>`}
-                     </td>
-                 </tr>
-             `).join('');
-             lucide.createIcons();
+         const body = document.getElementById('leaveTableBody');
+         body.innerHTML = leavesData.map(item => `
+         <tr class="hover:bg-slate-50 transition-colors">
+             <td class="px-6 py-4">
+                 <div class="text-sm font-bold text-slate-800">${escapeHtml(item.techName)}</div>
+                 <div class="text-[10px] text-slate-400 font-black">${escapeHtml(item.techId)}</div>
+             </td>
+             <td class="px-6 py-4">
+                 <div class="text-xs font-bold text-indigo-600">${escapeHtml(item.leaveType)}</div>
+                 <div class="text-[10px] text-slate-500">${item.startDate} to ${item.endDate}</div>
+             </td>
+             <td class="px-6 py-4">
+                 <div class="text-[10px] text-slate-600 max-w-[150px] truncate" title="${escapeHtml(item.reason || '')}">
+                     ${escapeHtml(item.reason || 'No reason provided')}
+                 </div>
+             </td>
+             <td class="px-6 py-4">
+                 <span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${getStatusClass(item.status)}">${item.status}</span>
+             </td>
+             <td class="px-6 py-4 text-right">
+                 ${window.isAdmin && item.status === 'Pending' ? `
+                     <div class="flex justify-end gap-1">
+                         <button onclick="updateLeaveStatus('${item.id}', 'Approved')" class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100"><i data-lucide="check" size="14"></i></button>
+                         <button onclick="updateLeaveStatus('${item.id}', 'Rejected')" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"><i data-lucide="x" size="14"></i></button>
+                     </div>
+                 ` : window.isAdmin ? `<button onclick="deleteLeave('${item.id}')" class="text-slate-300 hover:text-red-400"><i data-lucide="trash-2" size="14"></i></button>` : `<i data-lucide="lock" size="14" class="text-slate-200 ml-auto"></i>`}
+             </td>
+         </tr>
+         `).join('');
+         lucide.createIcons();
          };
          
          window.updateLeaveStatus = async (id, status) => { await updateDoc(getDocPath('leaves', id), { status }); showToast(`Leave ${status}`); };
