@@ -1,714 +1,743 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dispute Management Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .custom-checkbox:checked { background-color: #4f46e5; border-color: #4f46e5; }
-        
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 8px;
-            padding: 16px;
-            position: fixed;
-            z-index: 100;
-            left: 50%;
-            bottom: 30px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        #toast.show {
-            visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex font-sans">
-
-    <!-- Sidebar -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 flex flex-col shadow-2xl">
-        <div class="p-6 flex items-center justify-between border-b border-slate-800/50">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Dispute Management Pro</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <script src="https://unpkg.com/lucide@latest"></script>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+      <style>
+         body { font-family: 'Inter', sans-serif; }
+         .fade-in { animation: fadeIn 0.3s ease-in-out; }
+         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+         .no-scrollbar::-webkit-scrollbar { display: none; }
+         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+         .custom-checkbox:checked { background-color: #4f46e5; border-color: #4f46e5; }
+         #toast {
+         visibility: hidden;
+         min-width: 250px;
+         margin-left: -125px;
+         background-color: #333;
+         color: #fff;
+         text-align: center;
+         border-radius: 8px;
+         padding: 16px;
+         position: fixed;
+         z-index: 100;
+         left: 50%;
+         bottom: 30px;
+         font-size: 14px;
+         font-weight: 600;
+         }
+         #toast.show {
+         visibility: visible;
+         animation: fadein 0.5s, fadeout 0.5s 2.5s;
+         }
+         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+      </style>
+   </head>
+   <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden flex font-sans">
+      <!-- Sidebar (Original Structure + Leave) -->
+      <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 flex flex-col shadow-2xl">
+         <div class="p-6 flex items-center justify-between border-b border-slate-800/50">
             <div class="flex items-center gap-2 font-bold text-xl">
-                <i data-lucide="shield-alert" class="text-indigo-400"></i>
-                <span>Dispute<span class="text-indigo-400">Mgr</span></span>
+               <i data-lucide="shield-alert" class="text-indigo-400"></i>
+               <span>Dispute<span class="text-indigo-400">Mgr</span></span>
             </div>
             <button onclick="toggleSidebar(false)" class="md:hidden text-slate-400 hover:text-white">
-                <i data-lucide="x"></i>
+            <i data-lucide="x"></i>
             </button>
-        </div>
-
-        <nav class="px-4 space-y-2 mt-6 flex-1">
+         </div>
+         <nav class="px-4 space-y-2 mt-6 flex-1">
             <button onclick="switchTab('list')" id="nav-list" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-indigo-600 text-white transition-colors">
-                <i data-lucide="layout-dashboard" size="20"></i>
-                <span class="font-medium">Overview</span>
+            <i data-lucide="layout-dashboard" size="20"></i>
+            <span class="font-medium">Overview</span>
             </button>
             <button onclick="switchTab('create')" id="nav-create" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                <i data-lucide="file-plus" size="20"></i>
-                <span class="font-medium">New Dispute</span>
+            <i data-lucide="file-plus" size="20"></i>
+            <span class="font-medium">New Dispute</span>
+            </button>
+            <!-- NEW LEAVE FEATURE -->
+            <button onclick="switchTab('leave')" id="nav-leave" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+            <i data-lucide="calendar-days" size="20"></i>
+            <span class="font-medium">Leave Scheduler</span>
             </button>
             <button onclick="switchTab('settings')" id="nav-settings" class="admin-only hidden w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                <i data-lucide="settings" size="20"></i>
-                <span class="font-medium">Settings</span>
+            <i data-lucide="settings" size="20"></i>
+            <span class="font-medium">Settings</span>
             </button>
-        </nav>
-
-        <div class="p-4 border-t border-slate-800 space-y-2">
+         </nav>
+         <div class="p-4 border-t border-slate-800 space-y-2">
             <button onclick="logoutAdmin()" id="logoutBtn" class="admin-only hidden w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors">
-                <i data-lucide="log-out" size="20"></i>
-                <span class="font-medium">Exit Admin</span>
+            <i data-lucide="log-out" size="20"></i>
+            <span class="font-medium">Exit Admin</span>
             </button>
-            
             <button onclick="toggleAdmin()" id="adminBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors group">
-                <i data-lucide="user-cog" size="20" class="group-hover:text-indigo-400"></i>
-                <span id="adminBtnText">Admin Access</span>
+            <i data-lucide="user-cog" size="20" class="group-hover:text-indigo-400"></i>
+            <span id="adminBtnText">Admin Access</span>
             </button>
-        </div>
-    </aside>
-
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleSidebar(false)"></div>
-
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
-        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 md:px-8 z-30 shrink-0">
+         </div>
+      </aside>
+      <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleSidebar(false)"></div>
+      <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+         <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 md:px-8 z-30 shrink-0">
             <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar(true)" class="md:hidden text-slate-500 hover:text-slate-700">
-                    <i data-lucide="menu"></i>
-                </button>
-                <h1 id="pageTitle" class="text-lg md:text-xl font-semibold text-slate-800 truncate">Dashboard</h1>
+               <button onclick="toggleSidebar(true)" class="md:hidden text-slate-500 hover:text-slate-700">
+               <i data-lucide="menu"></i>
+               </button>
+               <h1 id="pageTitle" class="text-lg md:text-xl font-semibold text-slate-800 truncate">Dashboard</h1>
             </div>
             <div class="flex items-center gap-4">
-                <span id="adminBadge" class="hidden items-center gap-2 px-3 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-black border border-red-100 uppercase tracking-wider">
-                    <i data-lucide="shield-alert" size="12"></i> ADMIN MODE
-                </span>
-                <div id="userAvatar" class="h-9 w-9 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold text-sm border-2 border-white shadow-sm uppercase">US</div>
+               <span id="adminBadge" class="hidden items-center gap-2 px-3 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-black border border-red-100 uppercase tracking-wider">
+               <i data-lucide="shield-alert" size="12"></i> ADMIN MODE
+               </span>
+               <div id="userAvatar" class="h-9 w-9 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold text-sm border-2 border-white shadow-sm uppercase">US</div>
             </div>
-        </header>
-
-        <main class="flex-1 overflow-y-auto p-4 md:p-8 relative no-scrollbar">
+         </header>
+         <main class="flex-1 overflow-y-auto p-4 md:p-8 relative no-scrollbar">
             <div id="loading" class="absolute inset-0 flex items-center justify-center bg-slate-50 z-20 transition-opacity duration-500">
-                <div class="flex flex-col items-center gap-4">
-                    <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
-                    <span class="text-slate-400 text-sm font-medium">Synchronizing Secure Data...</span>
-                </div>
+               <div class="flex flex-col items-center gap-4">
+                  <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
+                  <span class="text-slate-400 text-sm font-medium">Synchronizing Secure Data...</span>
+               </div>
             </div>
-
+            <!-- Dashboard View (Original) -->
             <div id="view-list" class="fade-in space-y-6">
-                <!-- Stats -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</p>
-                        <h4 id="stat-total" class="text-2xl font-bold text-slate-900">0</h4>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                        <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest">Pending</p>
-                        <h4 id="stat-pending" class="text-2xl font-bold text-slate-900">0</h4>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                        <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Resolved</p>
-                        <h4 id="stat-resolved" class="text-2xl font-bold text-slate-900">0</h4>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                        <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Efficiency</p>
-                        <h4 id="stat-rate" class="text-2xl font-bold text-slate-900">0%</h4>
-                    </div>
-                </div>
-
-                <!-- Filters & Search -->
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-                    <div class="relative w-full md:w-96">
-                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size="18"></i>
-                        <input type="text" id="searchInput" oninput="renderMainTable()" placeholder="Search tech, ID, or project..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition-all">
-                    </div>
-                    <div class="flex items-center gap-2 w-full md:w-auto">
-                        <select id="filterStatus" onchange="renderMainTable()" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 outline-none">
-                            <option value="All">All Status</option>
-                            <option value="Open">Pending</option>
-                            <option value="Resolved">Resolved</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="overflow-x-auto">
+               <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Disputes</p>
+                     <h4 id="stat-total" class="text-2xl font-bold text-slate-900">0</h4>
+                  </div>
+                  <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                     <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest">Pending</p>
+                     <h4 id="stat-pending" class="text-2xl font-bold text-slate-900">0</h4>
+                  </div>
+                  <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                     <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Resolved</p>
+                     <h4 id="stat-resolved" class="text-2xl font-bold text-slate-900">0</h4>
+                  </div>
+                  <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                     <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Efficiency</p>
+                     <h4 id="stat-rate" class="text-2xl font-bold text-slate-900">0%</h4>
+                  </div>
+               </div>
+               <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+                  <div class="relative w-full md:w-96">
+                     <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size="18"></i>
+                     <input type="text" id="searchInput" oninput="renderMainTable()" placeholder="Search tech, ID, or project..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition-all">
+                  </div>
+                  <div class="flex items-center gap-2 w-full md:w-auto">
+                     <select id="filterStatus" onchange="renderMainTable()" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 outline-none">
+                        <option value="All">All Status</option>
+                        <option value="Open">Pending</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Rejected">Rejected</option>
+                     </select>
+                     <button onclick="bulkDelete()" class="admin-only hidden p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
+                     <i data-lucide="trash-2" size="18"></i>
+                     </button>
+                  </div>
+               </div>
+               <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                  <div class="overflow-x-auto">
+                     <table class="w-full text-left border-collapse">
+                        <thead>
+                           <tr class="bg-slate-50 border-b border-slate-200 text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                              <th class="px-6 py-5 admin-only hidden w-10">
+                                 <input type="checkbox" id="selectAll" class="custom-checkbox h-4 w-4 rounded" onclick="toggleSelectAll(this)">
+                              </th>
+                              <th class="px-6 py-5">Project / Block</th>
+                              <th class="px-6 py-5">Technician</th>
+                              <th class="px-6 py-5">Priority</th>
+                              <th class="px-6 py-5">Category</th>
+                              <th class="px-6 py-5">Type</th>
+                              <th class="px-6 py-5">Status</th>
+                              <th class="px-6 py-5 text-right">Actions</th>
+                           </tr>
+                        </thead>
+                        <tbody id="disputesTableBody" class="divide-y divide-slate-100"></tbody>
+                     </table>
+                     <div id="no-data" class="hidden py-20 text-center text-slate-400 font-medium">No records found matching criteria.</div>
+                  </div>
+               </div>
+            </div>
+            <!-- Leave Scheduler View (NEW) -->
+            <div id="view-leave" class="hidden fade-in max-w-6xl mx-auto pb-10 space-y-8">
+               <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <!-- Leave Form -->
+                  <div class="lg:col-span-1">
+                     <form id="leaveForm" class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+                        <div class="p-6 space-y-4">
+                           <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                              <i data-lucide="calendar-plus" class="text-indigo-600"></i> File Leave
+                           </h3>
+                           <div>
+                              <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Technician</label>
+                              <select name="techData" id="leave-tech" required onchange="handleLeaveTechSelect(this)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
+                              <input type="hidden" name="techId">
+                              <input type="hidden" name="techName">
+                           </div>
+                           <div>
+                              <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Leave Type</label>
+                              <select name="leaveType" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                                 <option value="Sick Leave">Sick Leave</option>
+                                 <option value="Vacation Leave">Vacation Leave</option>
+                                 <option value="Emergency Leave">Emergency Leave</option>
+                                 <option value="Other">Other</option>
+                              </select>
+                           </div>
+                           <div class="grid grid-cols-2 gap-3">
+                              <div>
+                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Start Date</label>
+                                 <input type="date" name="startDate" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none">
+                              </div>
+                              <div>
+                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">End Date</label>
+                                 <input type="date" name="endDate" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none">
+                              </div>
+                           </div>
+                           <div>
+                              <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Reason</label>
+                              <textarea name="reason" placeholder="Brief explanation..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm min-h-[80px] outline-none"></textarea>
+                           </div>
+                           <button type="submit" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-all">Submit Request</button>
+                        </div>
+                     </form>
+                  </div>
+                  <!-- Leave List -->
+                  <div class="lg:col-span-2 space-y-4">
+                     <h3 class="text-xl font-bold text-slate-800">Recent Leave Requests</h3>
+                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                         <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-[10px] uppercase text-slate-400 font-bold tracking-widest">
-                                    <th class="px-6 py-5 admin-only hidden w-10">
-                                        <input type="checkbox" id="selectAll" class="custom-checkbox h-4 w-4 rounded">
-                                    </th>
-                                    <th class="px-6 py-5">Project / Block</th>
-                                    <th class="px-6 py-5">Technician</th>
-                                    <th class="px-6 py-5">Priority</th>
-                                    <th class="px-6 py-5">Category</th>
-                                    <th class="px-6 py-5">Type</th>
-                                    <th class="px-6 py-5">Status</th>
-                                    <th class="px-6 py-5 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="disputesTableBody" class="divide-y divide-slate-100"></tbody>
+                           <thead class="bg-slate-50 border-b border-slate-200 text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                              <tr>
+                                 <th class="px-6 py-4">Technician</th>
+                                 <th class="px-6 py-4">Type / Dates</th>
+                                 <th class="px-6 py-4">Status</th>
+                                 <th class="px-6 py-4 text-right">Admin</th>
+                              </tr>
+                           </thead>
+                           <tbody id="leaveTableBody" class="divide-y divide-slate-100"></tbody>
                         </table>
-                        <div id="no-data" class="hidden py-20 text-center text-slate-400 font-medium">No records found matching criteria.</div>
-                    </div>
-                </div>
+                     </div>
+                  </div>
+               </div>
             </div>
-
-            <!-- View: Create -->
+            <!-- Create View (Original) -->
             <div id="view-create" class="hidden fade-in max-w-4xl mx-auto pb-10">
-                <form id="createForm" class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-                    <div class="p-6 md:p-10 space-y-6">
-                        <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
-                            <span class="h-10 w-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center"><i data-lucide="plus-circle" size="20"></i></span>
-                            Dispute Entry Form
-                        </h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Project Name</label>
-                                    <select name="project" id="create-project" required onchange="handleProjectChange(this.value)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
-                                </div>
-                                <div id="custom-project-container" class="hidden fade-in">
-                                    <label class="block text-[10px] font-black text-indigo-400 uppercase mb-2">New Project Name</label>
-                                    <input type="text" id="custom-project-name" placeholder="Enter name..." class="w-full px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-xl text-sm outline-none">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Block ID</label>
-                                <input type="text" name="blockId" id="create-blockId" placeholder="N/A" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Technician</label>
-                                <select name="techData" id="create-tech" required onchange="handleTechSelect(this)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
-                                <input type="hidden" name="techId"><input type="hidden" name="techName">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Team</label>
-                                <select name="team" id="create-team" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Priority Level</label>
-                                <select name="priority" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
-                                    <option value="Low">Low</option>
-                                    <option value="Medium" selected>Medium</option>
-                                    <option value="High">High</option>
-                                    <option value="Critical">Critical</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Partial</label>
-                                <select name="partialSpinner" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
-                                    <option value="">Select Partial</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9</option>
-                                    <option value="10">10</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Category</label>
-                                <select name="category" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
-                                    <option value="">Select Category</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Type</label>
-                                <select name="type" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
-                                    <option value="">Select Type</option>
-                                    <option value="Incorrect">Incorrect</option>
-                                    <option value="Skip">Skip</option>
-                                    <option value="Change">Change</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">RQA Reviewer</label>
-                                <select name="rqaTechId" id="create-rqa-tech" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">UID</label>
-                                <input type="text" name="fpUid" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
-                            </div>
-                            <div class="col-span-1 md:col-span-2">
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Dispute Reason</label>
-                                <textarea name="reason" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm min-h-[100px] outline-none"></textarea>
-                            </div>
+               <form id="createForm" class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+                  <div class="p-6 md:p-10 space-y-6">
+                     <h2 class="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-3">
+                        <span class="h-10 w-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center"><i data-lucide="plus-circle" size="20"></i></span>
+                        Dispute Entry Form
+                     </h2>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Project Name</label>
+                           <select name="project" id="create-project" required onchange="handleProjectChange(this.value)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 ring-indigo-500/10"></select>
+                           <div id="custom-project-container" class="hidden mt-3 fade-in">
+                              <input type="text" id="custom-project-name" placeholder="Enter new project name..." class="w-full px-4 py-3 bg-indigo-50 border border-indigo-100 rounded-xl text-sm outline-none">
+                           </div>
                         </div>
-                    </div>
-                    <div class="bg-slate-50 p-6 border-t border-slate-100 flex justify-end gap-3">
-                        <button type="reset" class="px-6 py-3 text-slate-600 font-bold hover:bg-slate-200 rounded-xl">Clear</button>
-                        <button type="submit" id="submitBtn" class="px-10 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-all">Submit Dispute</button>
-                    </div>
-                </form>
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Block ID</label>
+                           <input type="text" name="blockId" id="create-blockId" readonly class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 outline-none">
+                        </div>
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Technician Name</label>
+                           <select name="techData" id="create-tech" required onchange="handleTechSelect(this)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
+                           <input type="hidden" name="techId">
+                           <input type="hidden" name="techName">
+                        </div>
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Team</label>
+                           <select name="team" id="create-team" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
+                        </div>
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Priority Level</label>
+                           <select name="priority" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                              <option value="Low">Low</option>
+                              <option value="Medium" selected>Medium</option>
+                              <option value="High">High</option>
+                              <option value="Critical">Critical</option>
+                           </select>
+                        </div>
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Partial</label>
+                           <select name="partialSpinner" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                              <option value="">Select Partial</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                              <option value="3">3</option>
+                              <option value="4">4</option>
+                              <option value="5">5</option>
+                              <option value="6">6</option>
+                              <option value="7">7</option>
+                              <option value="8">8</option>
+                              <option value="9">9</option>
+                              <option value="10">10</option>
+                           </select>
+                        </div>
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Category</label>
+                           <select name="category" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                              <option value="">Select Category</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                              <option value="3">3</option>
+                              <option value="4">4</option>
+                              <option value="5">5</option>
+                              <option value="6">6</option>
+                              <option value="7">7</option>
+                              <option value="8">8</option>
+                              <option value="9">9</option>
+                           </select>
+                        </div>
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Type</label>
+                           <select name="type" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                              <option value="">Select Type</option>
+                              <option value="Incorrect">Incorrect</option>
+                              <option value="Skip">Skip</option>
+                              <option value="Change">Change</option>
+                           </select>
+                        </div>
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">RQA Reviewer</label>
+                           <select name="rqaTechId" id="create-rqa-tech" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
+                        </div>
+                        <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">UID (FP)</label>
+                           <input type="text" name="fpUid" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                        </div>
+                        <div class="col-span-1 md:col-span-2">
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Dispute Reason</label>
+                           <textarea name="reason" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm min-h-[100px] outline-none"></textarea>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="bg-slate-50 p-6 border-t border-slate-100 flex justify-end gap-3">
+                     <button type="reset" class="px-6 py-3 text-slate-600 font-bold hover:bg-slate-200 rounded-xl">Clear</button>
+                     <button type="submit" id="submitBtn" class="px-10 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-all">Submit Dispute</button>
+                  </div>
+               </form>
             </div>
-
-            <!-- View: Settings -->
+            <!-- Settings View (Original Layout) -->
             <div id="view-settings" class="hidden fade-in max-w-6xl mx-auto space-y-8 pb-10">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="trash-2" size="18" class="text-indigo-500"></i> Auto-Maintenance</h3>
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Auto-Delete Resolved Disputes After (Days)</label>
-                            <input type="number" id="auto-delete-days" min="1" max="90" placeholder="e.g. 7" class="w-full bg-slate-50 p-3 border rounded-xl text-sm outline-none">
-                        </div>
-                        <button onclick="saveAutoDeleteSetting()" class="h-[46px] mt-5 px-6 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all">Save Changes</button>
-                    </div>
-                    <p class="text-[10px] text-slate-400">Resolved disputes older than this number of days will be permanently removed.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="folder" size="18" class="text-indigo-500"></i> Manage Projects</h3>
-                        <div class="flex gap-2">
-                            <input type="text" id="new-proj-name" placeholder="Name" class="flex-1 bg-slate-50 p-2 border rounded-lg text-xs outline-none">
-                            <input type="text" id="new-proj-block" placeholder="Block" class="w-20 bg-slate-50 p-2 border rounded-lg text-xs outline-none">
-                            <button onclick="addItem('projects', {name: document.getElementById('new-proj-name').value, blockId: document.getElementById('new-proj-block').value})" class="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs font-bold">Add</button>
-                        </div>
-                        <div id="list-projects" class="max-h-40 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users" size="18" class="text-indigo-500"></i> Manage Technicians</h3>
-                        <div class="flex gap-2">
-                            <input type="text" id="new-tech-name" placeholder="Name" class="flex-1 bg-slate-50 p-2 border rounded-lg text-xs outline-none">
-                            <input type="text" id="new-tech-id" placeholder="ID" class="w-20 bg-slate-50 p-2 border rounded-lg text-xs outline-none">
-                            <button onclick="addItem('techs', {techName: document.getElementById('new-tech-name').value, techId: document.getElementById('new-tech-id').value})" class="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs font-bold">Add</button>
-                        </div>
-                        <div id="list-techs" class="max-h-40 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users-round" size="18" class="text-indigo-500"></i> Manage Teams</h3>
-                        <div class="flex gap-2">
-                            <input type="text" id="new-team-name" placeholder="Team Name" class="flex-1 bg-slate-50 p-2 border rounded-lg text-xs outline-none">
-                            <button onclick="addItem('teams', {name: document.getElementById('new-team-name').value})" class="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs font-bold">Add</button>
-                        </div>
-                        <div id="list-teams" class="max-h-40 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="shield-check" size="18" class="text-indigo-500"></i> Manage RQA Reviewers</h3>
-                        <div class="flex gap-2">
-                            <input type="text" id="new-rqa-id" placeholder="Reviewer ID" class="flex-1 bg-slate-50 p-2 border rounded-lg text-xs outline-none">
-                            <button onclick="addItem('rqatechs', {rqaId: document.getElementById('new-rqa-id').value})" class="bg-slate-900 text-white px-3 py-2 rounded-lg text-xs font-bold">Add</button>
-                        </div>
-                        <div id="list-rqatechs" class="max-h-40 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
-                    </div>
-                </div>
+               <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                  <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="trash-2" size="18" class="text-indigo-500"></i> Auto-Maintenance</h3>
+                  <div class="flex items-center gap-4">
+                     <div class="flex-1">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Auto-Delete Resolved Disputes After (Days)</label>
+                        <input type="number" id="auto-delete-days" min="1" max="90" placeholder="e.g. 7" class="w-full bg-slate-50 p-3 border rounded-xl text-sm outline-none">
+                     </div>
+                     <button onclick="saveAutoDeleteSetting()" class="h-[46px] mt-5 px-6 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all">Save Changes</button>
+                  </div>
+               </div>
+               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                     <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm"><i data-lucide="folder" size="16"></i> Projects</h3>
+                     <div class="space-y-2">
+                        <input type="text" id="new-proj-name" placeholder="Name" class="w-full bg-slate-50 p-2 border rounded-lg text-xs outline-none">
+                        <input type="text" id="new-proj-block" placeholder="Block ID" class="w-full bg-slate-50 p-2 border rounded-lg text-xs outline-none">
+                        <button onclick="addItem('projects', {name: document.getElementById('new-proj-name').value, blockId: document.getElementById('new-proj-block').value})" class="w-full bg-slate-900 text-white py-2 rounded-lg text-xs font-bold">Add Project</button>
+                     </div>
+                     <div id="list-projects" class="max-h-60 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
+                  </div>
+                  <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                     <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm"><i data-lucide="users" size="16"></i> Techs</h3>
+                     <div class="space-y-2">
+                        <input type="text" id="new-tech-name" placeholder="Name" class="w-full bg-slate-50 p-2 border rounded-lg text-xs outline-none">
+                        <input type="text" id="new-tech-id" placeholder="ID" class="w-full bg-slate-50 p-2 border rounded-lg text-xs outline-none">
+                        <button onclick="addItem('techs', {techName: document.getElementById('new-tech-name').value, techId: document.getElementById('new-tech-id').value})" class="w-full bg-slate-900 text-white py-2 rounded-lg text-xs font-bold">Add Tech</button>
+                     </div>
+                     <div id="list-techs" class="max-h-60 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
+                  </div>
+                  <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                     <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm"><i data-lucide="users-2" size="16"></i> Teams</h3>
+                     <div class="space-y-2">
+                        <input type="text" id="new-team-name" placeholder="Team Name" class="w-full bg-slate-50 p-2 border rounded-lg text-xs outline-none">
+                        <button onclick="addItem('teams', {name: document.getElementById('new-team-name').value})" class="w-full bg-slate-900 text-white py-2 rounded-lg text-xs font-bold">Add Team</button>
+                     </div>
+                     <div id="list-teams" class="max-h-60 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
+                  </div>
+                  <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                     <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm"><i data-lucide="shield-check" size="16"></i> RQA</h3>
+                     <div class="space-y-2">
+                        <input type="text" id="new-rqa-id" placeholder="RQA ID" class="w-full bg-slate-50 p-2 border rounded-lg text-xs outline-none">
+                        <button onclick="addItem('rqatechs', {rqaId: document.getElementById('new-rqa-id').value})" class="w-full bg-slate-900 text-white py-2 rounded-lg text-xs font-bold">Add RQA</button>
+                     </div>
+                     <div id="list-rqatechs" class="max-h-60 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
+                  </div>
+               </div>
             </div>
-        </main>
-    </div>
-
-    <!-- Modals -->
-    <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/80 z-[80] flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm text-center">
-            <h3 class="text-xl font-bold mb-6">Admin Access</h3>
+         </main>
+      </div>
+      <!-- Modals (Original) -->
+      <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/80 z-[80] flex items-center justify-center p-4">
+         <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm text-center">
+            <h3 class="text-xl font-bold mb-6">Admin Verification</h3>
             <input type="password" id="adminPinInput" maxlength="4" placeholder="••••" class="w-full px-4 py-3 text-center text-3xl font-black bg-slate-50 border rounded-2xl mb-6 outline-none">
             <div class="flex gap-2">
-                <button onclick="closeAdminModal()" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold text-slate-600">Cancel</button>
-                <button onclick="verifyPin()" class="flex-1 py-3 bg-slate-900 text-white rounded-xl font-bold">Verify</button>
+               <button onclick="closeAdminModal()" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold text-slate-600">Cancel</button>
+               <button onclick="verifyPin()" class="flex-1 py-3 bg-slate-900 text-white rounded-xl font-bold">Verify</button>
             </div>
-        </div>
-    </div>
-
-    <div id="detailsModal" class="hidden fixed inset-0 bg-slate-900/80 z-[70] flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
+         </div>
+      </div>
+      <!-- Details Modal (RESTORED TO ORIGINAL WITH COPY ICONS) -->
+      <div id="detailsModal" class="hidden fixed inset-0 bg-slate-900/80 z-[70] flex items-center justify-center p-4">
+         <div class="bg-white rounded-[2rem] max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
             <div id="modalHeader" class="p-6 bg-slate-50 border-b flex justify-between items-center">
-                <h3 id="modalTitle" class="font-bold text-lg text-slate-800">Dispute Details</h3>
-                <button onclick="closeDetailsModal()" class="p-2 hover:bg-slate-200 rounded-full"><i data-lucide="x" size="20"></i></button>
+               <h3 id="modalTitle" class="font-bold text-lg text-slate-800">Dispute Review</h3>
+               <button onclick="closeDetailsModal()" class="p-2 hover:bg-slate-200 rounded-full"><i data-lucide="x" size="20"></i></button>
             </div>
-            <div id="modalContent" class="p-8 space-y-4 overflow-y-auto no-scrollbar"></div>
+            <div id="modalContent" class="p-8 space-y-6 overflow-y-auto no-scrollbar"></div>
             <div id="modalFooter" class="p-6 bg-slate-50 border-t flex flex-wrap justify-between items-center gap-4">
-                <button onclick="copyAllDetails()" class="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-lg hover:bg-indigo-100 transition-all">
-                    <i data-lucide="copy" size="14"></i> Copy All Details
-                </button>
-                <div id="adminActions" class="flex gap-2"></div>
+               <button onclick="copyAllDetails()" id="copyDetailsBtn" class="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-lg hover:bg-indigo-100 transition-all">
+               <i data-lucide="copy" size="14"></i> Copy All
+               </button>
+               <div id="adminActions" class="flex gap-2"></div>
             </div>
-        </div>
-    </div>
-
-    <div id="toast">Action completed!</div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, setDoc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAzcrNsEZKka6SBEC-plnydGJKTaiR9Sk0",
-            authDomain: "dispute-216ae.firebaseapp.com",
-            projectId: "dispute-216ae",
-            storageBucket: "dispute-216ae.firebasestorage.app",
-            messagingSenderId: "1075809303666",
-            appId: "1:1075809303666:web:e991c931f78e1e274916eb"
-        };
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dispute-mgr-production';
-        let db, auth;
-        let disputesData = [];
-        let systemSettings = { projects: [], techs: [], teams: [], rqaTechs: [], adminPin: '1234', autoDeleteDays: 7 };
-        window.isAdmin = false;
-
-        const getCollectionPath = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
-        const getDocPath = (name, id) => doc(db, 'artifacts', appId, 'public', 'data', name, id);
-
-        async function init() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                await signInAnonymously(auth);
-                onAuthStateChanged(auth, user => { if(user) startListeners(); });
-                document.getElementById('loading').classList.add('opacity-0', 'pointer-events-none');
-            } catch (err) { console.error(err); }
-        }
-
-        function startListeners() {
-            onSnapshot(getCollectionPath('disputes'), snap => {
-                disputesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderMainTable();
-                updateStats();
-                performMaintenance();
-            });
-            
-            ['projects', 'techs', 'teams', 'rqatechs', 'app_settings'].forEach(col => {
-                onSnapshot(getCollectionPath(col), snap => {
-                    if (col === 'app_settings') {
-                        const settingsDoc = snap.docs.find(d => d.id === 'general');
-                        if (settingsDoc) {
-                            systemSettings.autoDeleteDays = settingsDoc.data().autoDeleteDays || 7;
-                            const input = document.getElementById('auto-delete-days');
-                            if (input) input.value = systemSettings.autoDeleteDays;
-                        }
-                        return;
-                    }
-                    const key = col === 'rqatechs' ? 'rqaTechs' : col;
-                    systemSettings[key] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    updateFormDropdowns();
-                    renderManagementList(col, systemSettings[key]);
-                });
-            });
-        }
-
-        async function performMaintenance() {
-            if (!disputesData.length) return;
-            const threshold = new Date();
-            threshold.setDate(threshold.getDate() - (systemSettings.autoDeleteDays || 7));
-            
-            const toDelete = disputesData.filter(d => {
-                if (d.status !== 'Resolved' || !d.createdAt) return false;
-                const createdDate = d.createdAt.toDate ? d.createdAt.toDate() : new Date(d.createdAt);
-                return createdDate < threshold;
-            });
-
-            for (const d of toDelete) {
-                try { await deleteDoc(getDocPath('disputes', d.id)); } catch(e) {}
-            }
-        }
-
-        window.saveAutoDeleteSetting = async () => {
-            const days = parseInt(document.getElementById('auto-delete-days').value);
-            if (isNaN(days) || days < 1) return;
-            try {
-                await setDoc(getDocPath('app_settings', 'general'), { autoDeleteDays: days }, { merge: true });
-                showToast("Settings saved!");
-            } catch (e) { console.error(e); }
-        };
-
-        window.copyText = (text) => {
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            showToast("Copied to clipboard!");
-        };
-
-        function showToast(msg = "Action completed!") {
-            const t = document.getElementById("toast");
-            t.innerText = msg;
-            t.className = "show";
-            setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
-        }
-
-        const getPriorityColor = (p) => {
-            switch(p) {
-                case 'Critical': return 'bg-red-500 text-white';
-                case 'High': return 'bg-orange-100 text-orange-700';
-                case 'Medium': return 'bg-blue-100 text-blue-700';
-                case 'Low': return 'bg-slate-100 text-slate-700';
-                default: return 'bg-slate-100 text-slate-700';
-            }
-        };
-
-        window.showDetails = (id) => {
-            const d = disputesData.find(x => x.id === id);
-            if (!d) return;
-            
-            const detailRow = (label, value, copyValue = null) => {
-                const finalCopy = copyValue || value;
-                return `
-                <div class="bg-slate-50 p-3 rounded-xl relative group flex justify-between items-start">
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">${label}</label>
-                        <p class="font-bold text-slate-800 text-sm break-all">${escapeHtml(value)}</p>
-                    </div>
-                    <button onclick="copyText('${escapeHtml(finalCopy)}')" class="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-indigo-600 transition-all" title="Copy ${label}">
-                        <i data-lucide="copy" size="14"></i>
-                    </button>
-                </div>
-            `};
-
-            document.getElementById('modalContent').innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    ${detailRow('Technician Name', d.techName)}
-                    ${detailRow('Technician ID', d.techId)}
-                    ${detailRow('Project Name', d.project)}
-                    ${detailRow('Block ID', d.blockId)}
-                    ${detailRow('Priority', d.priority || 'Medium')}
-                    ${detailRow('Partial', d.partialSpinner, `Partial ${d.partialSpinner}`)}
-                    ${detailRow('Category', d.category)}
-                    ${detailRow('Classification Type', d.type)}
-                    ${detailRow('Team Name', d.team)}
-                    ${detailRow('RQA Reviewer ID', d.rqaTechId)}
-                    <div class="md:col-span-2">
-                        ${detailRow('Unique Identifier (UID)', d.fpUid)}
-                    </div>
-                </div>
-                <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-                    <div class="flex justify-between items-start mb-1">
-                        <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Dispute Reason</label>
-                        <button onclick="copyText('${escapeHtml(d.reason)}')" class="p-2 hover:bg-white rounded-lg text-indigo-400 hover:text-indigo-600 transition-all">
-                            <i data-lucide="copy" size="14"></i>
-                        </button>
-                    </div>
-                    <p class="text-sm text-indigo-900 whitespace-pre-wrap leading-relaxed font-medium">${escapeHtml(d.reason)}</p>
-                </div>
-            `;
-
-            window.currentDispute = d;
-            const adminActions = document.getElementById('adminActions');
-            adminActions.innerHTML = window.isAdmin ? `
-                <button onclick="deleteEntry('${d.id}')" class="px-4 py-2 text-red-600 font-bold text-xs hover:bg-red-50 rounded-lg">Delete</button>
-                <button onclick="updateStatus('${d.id}', 'Rejected')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg">Reject</button>
-                <button onclick="updateStatus('${d.id}', 'Resolved')" class="px-6 py-2 bg-emerald-600 text-white font-bold text-xs rounded-lg shadow-lg">Resolve</button>
-            ` : `<button onclick="closeDetailsModal()" class="px-6 py-2 bg-indigo-600 text-white font-bold text-xs rounded-lg">Close</button>`;
-            
-            document.getElementById('detailsModal').classList.remove('hidden');
-            lucide.createIcons();
-        };
-
-        window.copyAllDetails = () => {
-            const d = window.currentDispute;
-            if (!d) return;
-            const summary = `PRIORITY: ${d.priority || 'Medium'}\nTECH: ${d.techName} (${d.techId})\nPROJ: ${d.project} (${d.blockId})\nPARTIAL: Partial ${d.partialSpinner}\nCAT: ${d.category}\nTYPE: ${d.type}\nUID: ${d.fpUid}\nREASON: ${d.reason}`;
-            copyText(summary);
-        };
-
-        window.closeDetailsModal = () => document.getElementById('detailsModal').classList.add('hidden');
-
-        window.renderMainTable = () => {
-            const body = document.getElementById('disputesTableBody');
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const filter = document.getElementById('filterStatus').value;
-            const filtered = disputesData.filter(d => {
-                const matches = !search || d.techName.toLowerCase().includes(search) || d.project.toLowerCase().includes(search);
-                const matchesFilter = filter === 'All' || d.status === filter;
-                return matches && matchesFilter;
-            });
-            document.getElementById('no-data').classList.toggle('hidden', filtered.length > 0);
-            body.innerHTML = filtered.map(item => `
-                <tr class="hover:bg-slate-50 transition-colors cursor-pointer group" onclick="showDetails('${item.id}')">
-                    <td class="px-6 py-4 admin-only ${window.isAdmin ? '' : 'hidden'}" onclick="event.stopPropagation()">
-                        <input type="checkbox" class="custom-checkbox h-4 w-4 rounded">
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm font-bold text-slate-800">${escapeHtml(item.project)}</div>
-                        <div class="text-[10px] text-indigo-500 font-black">Block ${escapeHtml(item.blockId)}</div>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-slate-600">${escapeHtml(item.techName)}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase ${getPriorityColor(item.priority || 'Medium')}">${item.priority || 'Medium'}</span>
-                    </td>
-                    <td class="px-6 py-4 text-xs font-bold text-slate-500">
-                        Cat ${escapeHtml(item.category)}
-                    </td>
-                    <td class="px-6 py-4 text-xs font-bold text-slate-500">
-                        ${escapeHtml(item.type)}
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${item.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700' : item.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">${item.status}</span>
-                    </td>
-                    <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
-                        <button onclick="showDetails('${item.id}')" class="text-slate-400 group-hover:text-indigo-600 p-2"><i data-lucide="eye" size="18"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-            lucide.createIcons();
-        };
-
-        window.addItem = async (col, data) => {
-            if (!data.name && !data.techName && !data.rqaId) return;
-            await addDoc(getCollectionPath(col), { ...data, createdAt: serverTimestamp() });
-        };
-        window.removeItem = async (col, id) => { await deleteDoc(getDocPath(col, id)); };
-        
-        function renderManagementList(col, data) {
-            const container = document.getElementById(`list-${col}`);
-            if (!container) return;
-            container.innerHTML = data.map(item => `
-                <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg group">
-                    <span class="text-[11px] font-medium text-slate-700">${escapeHtml(item.name || item.techName || item.rqaId)}</span>
-                    <button onclick="removeItem('${col}', '${item.id}')" class="opacity-0 group-hover:opacity-100 text-red-400 transition-all"><i data-lucide="trash-2" size="14"></i></button>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        window.updateStatus = async (id, status) => { await updateDoc(getDocPath('disputes', id), { status }); closeDetailsModal(); };
-        window.deleteEntry = async (id) => { await deleteDoc(getDocPath('disputes', id)); closeDetailsModal(); };
-        
-        window.switchTab = (tab) => {
-            ['list', 'create', 'settings'].forEach(t => { 
-                document.getElementById(`view-${t}`)?.classList.add('hidden'); 
-                document.getElementById(`nav-${t}`)?.classList.remove('bg-indigo-600', 'text-white'); 
-            });
-            document.getElementById(`view-${tab}`)?.classList.remove('hidden'); 
-            document.getElementById(`nav-${tab}`)?.classList.add('bg-indigo-600', 'text-white');
-            document.getElementById('pageTitle').innerText = tab.charAt(0).toUpperCase() + tab.slice(1);
-            toggleSidebar(false); 
-            lucide.createIcons();
-        };
-
-        window.toggleAdmin = () => { if (window.isAdmin) { window.isAdmin = false; applyAdminState(); } else { document.getElementById('adminModal').classList.remove('hidden'); } };
-        
-        window.logoutAdmin = () => {
-            window.isAdmin = false;
-            applyAdminState();
-            switchTab('list');
-            showToast("Logged out from Admin mode");
-        };
-
-        window.verifyPin = () => { if (document.getElementById('adminPinInput').value === systemSettings.adminPin) { window.isAdmin = true; applyAdminState(); document.getElementById('adminModal').classList.add('hidden'); } else { alert('Wrong PIN'); } document.getElementById('adminPinInput').value = ''; };
-        
-        function applyAdminState() { 
-            document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !window.isAdmin)); 
-            document.getElementById('adminBadge').classList.toggle('hidden', !window.isAdmin); 
-            const btnText = document.getElementById('adminBtnText');
-            if(btnText) btnText.innerText = window.isAdmin ? "Admin Active" : "Admin Access";
-            renderMainTable(); 
-        }
-        
-        document.getElementById('createForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target).entries());
-            
-            // Handle custom project addition
-            if (data.project === "__add_new__") {
-                const customName = document.getElementById('custom-project-name').value.trim();
-                if (!customName) {
-                    alert("Please enter a project name.");
-                    return;
-                }
-                data.project = customName;
-                // Silently add to the permanent list for future use
-                await addItem('projects', { name: customName, blockId: data.blockId || "N/A" });
-            }
-
-            delete data.techData;
-            await addDoc(getCollectionPath('disputes'), { ...data, status: 'Open', createdAt: serverTimestamp() });
-            
-            // Clean up custom project UI if active
-            document.getElementById('custom-project-container').classList.add('hidden');
-            document.getElementById('create-blockId').readOnly = true;
-            
-            e.target.reset(); 
-            switchTab('list');
-            showToast("Dispute Submitted!");
-        };
-
-        window.handleProjectChange = (v) => { 
-            const customContainer = document.getElementById('custom-project-container');
-            const blockInput = document.getElementById('create-blockId');
-            
-            if (v === "__add_new__") {
-                customContainer.classList.remove('hidden');
-                blockInput.readOnly = false;
-                blockInput.value = "";
-                blockInput.focus();
-            } else {
-                customContainer.classList.add('hidden');
-                blockInput.readOnly = true;
-                const p = systemSettings.projects.find(x => x.name === v); 
-                blockInput.value = p ? p.blockId : ""; 
-            }
-        };
-        
-        window.handleTechSelect = (s) => { const [id, name] = s.value.split('|'); document.querySelector('[name="techId"]').value = id || ''; document.querySelector('[name="techName"]').value = name || ''; };
-        
-        function updateFormDropdowns() {
-            const fill = (id, data, key) => { const el = document.getElementById(id); if (el) el.innerHTML = '<option value="">Select Option</option>' + data.map(d => `<option value="${d[key]}">${d[key]}</option>`).join(''); };
-            
-            // Projects gets a special "Add New" option
-            const projEl = document.getElementById('create-project');
-            if (projEl) {
-                projEl.innerHTML = '<option value="">Select Project</option>' + 
-                                  systemSettings.projects.map(p => `<option value="${p.name}">${p.name}</option>`).join('') +
-                                  '<optgroup label="Missing Project?"><option value="__add_new__">+ Add New Project Name</option></optgroup>';
-            }
-
-            fill('create-team', systemSettings.teams, 'name');
-            fill('create-rqa-tech', systemSettings.rqaTechs, 'rqaId');
-            const techEl = document.getElementById('create-tech');
-            if (techEl) techEl.innerHTML = '<option value="">Select Technician</option>' + systemSettings.techs.map(t => `<option value="${t.techId}|${t.techName}">${t.techName} (${t.techId})</option>`).join('');
-        }
-
-        window.toggleSidebar = (s) => { const sidebar = document.getElementById('sidebar'); if (s) sidebar.classList.remove('-translate-x-full'); else sidebar.classList.add('-translate-x-full'); };
-        
-        function updateStats() {
-            const total = disputesData.length;
-            const res = disputesData.filter(d => d.status === 'Resolved').length;
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-pending').innerText = disputesData.filter(d => d.status === 'Open').length;
-            document.getElementById('stat-resolved').innerText = res;
-            document.getElementById('stat-rate').innerText = total > 0 ? Math.round((res/total)*100)+'%' : '0%';
-        }
-
-        init();
-        function escapeHtml(t) { return t ? t.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : ''; }
-        window.closeAdminModal = () => document.getElementById('adminModal').classList.add('hidden');
-    </script>
-</body>
+         </div>
+      </div>
+      <div id="toast">Action completed!</div>
+      <script type="module">
+         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+         
+         const firebaseConfig = {
+             apiKey: "AIzaSyAzcrNsEZKka6SBEC-plnydGJKTaiR9Sk0",
+             authDomain: "dispute-216ae.firebaseapp.com",
+             projectId: "dispute-216ae",
+             storageBucket: "dispute-216ae.firebasestorage.app",
+             messagingSenderId: "1075809303666",
+             appId: "1:1075809303666:web:e991c931f78e1e274916eb"
+         };
+         
+         const appId = 'dispute-mgr-production';
+         let db, auth;
+         let disputesData = [];
+         let leavesData = [];
+         let systemSettings = { projects: [], techs: [], teams: [], rqaTechs: [], adminPin: '1234', autoDeleteDays: 7 };
+         window.isAdmin = false;
+         
+         const getCollectionPath = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
+         const getDocPath = (name, id) => doc(db, 'artifacts', appId, 'public', 'data', name, id);
+         
+         async function init() {
+             try {
+                 const app = initializeApp(firebaseConfig);
+                 auth = getAuth(app);
+                 db = getFirestore(app);
+                 await signInAnonymously(auth);
+                 onAuthStateChanged(auth, user => { if(user) startListeners(); });
+                 document.getElementById('loading').classList.add('opacity-0', 'pointer-events-none');
+             } catch (err) { console.error(err); }
+         }
+         
+         function startListeners() {
+             onSnapshot(query(getCollectionPath('disputes'), orderBy('createdAt', 'desc')), snap => {
+                 disputesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                 renderMainTable();
+                 updateStats();
+                 checkAutoDelete();
+             });
+         
+             onSnapshot(query(getCollectionPath('leaves'), orderBy('createdAt', 'desc')), snap => {
+                 leavesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                 renderLeaveTable();
+             });
+             
+             ['projects', 'techs', 'teams', 'rqatechs', 'app_settings'].forEach(col => {
+                 onSnapshot(getCollectionPath(col), snap => {
+                     if (col === 'app_settings') {
+                         const settingsDoc = snap.docs.find(d => d.id === 'general');
+                         if (settingsDoc) systemSettings.autoDeleteDays = settingsDoc.data().autoDeleteDays || 7;
+                         return;
+                     }
+                     const key = col === 'rqatechs' ? 'rqaTechs' : col;
+                     systemSettings[key] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                     updateFormDropdowns();
+                     renderManagementList(col, systemSettings[key]);
+                 });
+             });
+         }
+         
+         window.renderMainTable = () => {
+             const body = document.getElementById('disputesTableBody');
+             const search = document.getElementById('searchInput').value.toLowerCase();
+             const filter = document.getElementById('filterStatus').value;
+             const filtered = disputesData.filter(d => {
+                 const matches = !search || d.techName?.toLowerCase().includes(search) || d.project?.toLowerCase().includes(search) || d.fpUid?.toLowerCase().includes(search);
+                 const matchesFilter = filter === 'All' || d.status === filter;
+                 return matches && matchesFilter;
+             });
+             document.getElementById('no-data').classList.toggle('hidden', filtered.length > 0);
+             body.innerHTML = filtered.map(item => `
+                 <tr class="hover:bg-slate-50 transition-colors cursor-pointer group" onclick="showDetails('${item.id}')">
+                     <td class="px-6 py-4 admin-only ${window.isAdmin ? '' : 'hidden'}" onclick="event.stopPropagation()">
+                         <input type="checkbox" class="row-checkbox custom-checkbox h-4 w-4 rounded" value="${item.id}">
+                     </td>
+                     <td class="px-6 py-4">
+                         <div class="text-sm font-bold text-slate-800">${escapeHtml(item.project)}</div>
+                         <div class="text-[10px] text-indigo-500 font-black">Block ${escapeHtml(item.blockId)}</div>
+                     </td>
+                     <td class="px-6 py-4 text-sm text-slate-600">${escapeHtml(item.techName)}</td>
+                     <td class="px-6 py-4"><span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase ${getPriorityColor(item.priority || 'Medium')}">${item.priority || 'Medium'}</span></td>
+                     <td class="px-6 py-4 text-xs font-bold text-slate-500">Cat ${escapeHtml(item.category)}</td>
+                     <td class="px-6 py-4 text-xs font-bold text-slate-500">${escapeHtml(item.type)}</td>
+                     <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${getStatusClass(item.status)}">${item.status}</span></td>
+                     <td class="px-6 py-4 text-right"><button class="text-slate-400 group-hover:text-indigo-600"><i data-lucide="eye" size="18"></i></button></td>
+                 </tr>
+             `).join('');
+             lucide.createIcons();
+         };
+         
+         // --- ORIGINAL DETAILS LOGIC WITH COPY ICONS ---
+           window.showDetails = (id) => {
+             const d = disputesData.find(x => x.id === id);
+             if (!d) return;
+             
+             const detailRow = (label, value, copyValue = null) => {
+                 const finalCopy = copyValue || value;
+                 return `
+                 <div class="bg-slate-50 p-3 rounded-xl relative group flex justify-between items-start">
+                     <div>
+                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">${label}</label>
+                         <p class="font-bold text-slate-800 text-sm break-all">${escapeHtml(value)}</p>
+                     </div>
+                     <button onclick="copyText('${escapeHtml(finalCopy)}')" class="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-indigo-600 transition-all" title="Copy ${label}">
+                         <i data-lucide="copy" size="14"></i>
+                     </button>
+                 </div>
+             `};
+         
+             document.getElementById('modalContent').innerHTML = `
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                     ${detailRow('Technician Name', d.techName)}
+                     ${detailRow('Technician ID', d.techId)}
+                     ${detailRow('Project Name', d.project)}
+                     ${detailRow('Block ID', d.blockId)}
+                     ${detailRow('Priority', d.priority || 'Medium')}
+                     ${detailRow('Partial', d.partialSpinner, `Partial ${d.partialSpinner}`)}
+                     ${detailRow('Category', d.category)}
+                     ${detailRow('Classification Type', d.type)}
+                     ${detailRow('Team Name', d.team)}
+                     ${detailRow('RQA Reviewer ID', d.rqaTechId)}
+                     <div class="md:col-span-2">
+                         ${detailRow('Unique Identifier (UID)', d.fpUid)}
+                     </div>
+                 </div>
+                 <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                     <div class="flex justify-between items-start mb-1">
+                         <label class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Dispute Reason</label>
+                         <button onclick="copyText('${escapeHtml(d.reason)}')" class="p-2 hover:bg-white rounded-lg text-indigo-400 hover:text-indigo-600 transition-all">
+                             <i data-lucide="copy" size="14"></i>
+                         </button>
+                     </div>
+                     <p class="text-sm text-indigo-900 whitespace-pre-wrap leading-relaxed font-medium">${escapeHtml(d.reason)}</p>
+                 </div>
+             `;
+         
+             window.currentDispute = d;
+             const adminActions = document.getElementById('adminActions');
+             adminActions.innerHTML = window.isAdmin ? `
+                 <button onclick="deleteEntry('${d.id}')" class="px-4 py-2 text-red-600 font-bold text-xs hover:bg-red-50 rounded-lg">Delete</button>
+                 <button onclick="updateStatus('${d.id}', 'Rejected')" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg">Reject</button>
+                 <button onclick="updateStatus('${d.id}', 'Resolved')" class="px-6 py-2 bg-emerald-600 text-white font-bold text-xs rounded-lg shadow-lg">Resolve</button>
+             ` : `<button onclick="closeDetailsModal()" class="px-6 py-2 bg-indigo-600 text-white font-bold text-xs rounded-lg">Close</button>`;
+             
+             document.getElementById('detailsModal').classList.remove('hidden');
+             lucide.createIcons();
+         };
+         
+         window.copyText = (text) => {
+             const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+             showToast("Copied to clipboard!");
+         };
+         
+         // --- LEAVE SCHEDULER ---
+         window.handleLeaveTechSelect = (s) => { 
+             const [id, name] = s.value.split('|'); 
+             document.querySelector('#leaveForm [name="techId"]').value = id || ''; 
+             document.querySelector('#leaveForm [name="techName"]').value = name || ''; 
+         };
+         
+         document.getElementById('leaveForm').onsubmit = async (e) => {
+             e.preventDefault();
+             const data = Object.fromEntries(new FormData(e.target).entries());
+             delete data.techData;
+             await addDoc(getCollectionPath('leaves'), { ...data, status: 'Pending', createdAt: serverTimestamp() });
+             e.target.reset(); showToast("Leave request filed!");
+         };
+         
+         window.renderLeaveTable = () => {
+             const body = document.getElementById('leaveTableBody');
+             body.innerHTML = leavesData.map(item => `
+                 <tr class="hover:bg-slate-50 transition-colors">
+                     <td class="px-6 py-4">
+                         <div class="text-sm font-bold text-slate-800">${escapeHtml(item.techName)}</div>
+                         <div class="text-[10px] text-slate-400 font-black">${escapeHtml(item.techId)}</div>
+                     </td>
+                     <td class="px-6 py-4">
+                         <div class="text-xs font-bold text-indigo-600">${escapeHtml(item.leaveType)}</div>
+                         <div class="text-[10px] text-slate-500">${item.startDate} to ${item.endDate}</div>
+                     </td>
+                     <td class="px-6 py-4">
+                         <span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${getStatusClass(item.status)}">${item.status}</span>
+                     </td>
+                     <td class="px-6 py-4 text-right">
+                         ${window.isAdmin && item.status === 'Pending' ? `
+                             <div class="flex justify-end gap-1">
+                                 <button onclick="updateLeaveStatus('${item.id}', 'Approved')" class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100"><i data-lucide="check" size="14"></i></button>
+                                 <button onclick="updateLeaveStatus('${item.id}', 'Rejected')" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"><i data-lucide="x" size="14"></i></button>
+                             </div>
+                         ` : window.isAdmin ? `<button onclick="deleteLeave('${item.id}')" class="text-slate-300 hover:text-red-400"><i data-lucide="trash-2" size="14"></i></button>` : `<i data-lucide="lock" size="14" class="text-slate-200 ml-auto"></i>`}
+                     </td>
+                 </tr>
+             `).join('');
+             lucide.createIcons();
+         };
+         
+         window.updateLeaveStatus = async (id, status) => { await updateDoc(getDocPath('leaves', id), { status }); showToast(`Leave ${status}`); };
+         window.deleteLeave = async (id) => { if(confirm("Delete request?")) await deleteDoc(getDocPath('leaves', id)); };
+         
+         // --- REST OF CORE FUNCTIONS ---
+         window.switchTab = (tab) => {
+             ['list', 'create', 'leave', 'settings'].forEach(t => { 
+                 document.getElementById(`view-${t}`)?.classList.add('hidden'); 
+                 document.getElementById(`nav-${t}`)?.classList.remove('bg-indigo-600', 'text-white'); 
+             });
+             document.getElementById(`view-${tab}`)?.classList.remove('hidden'); 
+             document.getElementById(`nav-${tab}`)?.classList.add('bg-indigo-600', 'text-white');
+             document.getElementById('pageTitle').innerText = tab === 'leave' ? 'Leave Scheduler' : tab.charAt(0).toUpperCase() + tab.slice(1);
+             toggleSidebar(false); 
+             lucide.createIcons();
+         };
+         
+         window.toggleAdmin = () => { if (window.isAdmin) { window.isAdmin = false; applyAdminState(); } else { document.getElementById('adminModal').classList.remove('hidden'); } };
+         window.verifyPin = () => { if (document.getElementById('adminPinInput').value === systemSettings.adminPin) { window.isAdmin = true; applyAdminState(); document.getElementById('adminModal').classList.add('hidden'); } else { showToast('Invalid PIN'); } document.getElementById('adminPinInput').value = ''; };
+         
+         window.logoutAdmin = () => {
+             window.isAdmin = false;
+             applyAdminState();
+             switchTab('list');
+             showToast("Logged out from Admin mode");
+         };
+         
+         function applyAdminState() { 
+             document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !window.isAdmin)); 
+             document.getElementById('adminBadge').classList.toggle('hidden', !window.isAdmin); 
+             document.getElementById('adminBtnText').innerText = window.isAdmin ? "Admin Active" : "Admin Access";
+             renderMainTable(); renderLeaveTable();
+         }
+         
+         window.updateStatus = async (id, s) => { await updateDoc(getDocPath('disputes', id), { status: s }); closeDetailsModal(); showToast(`Dispute ${s}`); };
+         window.deleteDispute = async (id) => { if(confirm("Delete record?")) { await deleteDoc(getDocPath('disputes', id)); closeDetailsModal(); showToast("Deleted"); }};
+         
+         window.copyAllDetails = () => {
+             const d = window.currentDispute;
+             const text = `PROJECT: ${d.project} (Block ${d.blockId})\nTECH: ${d.techName} (${d.techId})\nCATEGORY: ${d.category} | PARTIAL: ${d.partialSpinner} | TYPE: ${d.type}\nUID: ${d.fpUid}\nRQA: ${d.rqaTechId}\nREASON: ${d.reason}`;
+             copyText(text);
+         };
+         
+         window.handleProjectChange = (v) => { 
+             const custom = document.getElementById('custom-project-container');
+             const block = document.getElementById('create-blockId');
+             if (v === "__add_new__") { custom.classList.remove('hidden'); block.readOnly = false; block.value = ""; }
+             else { custom.classList.add('hidden'); block.readOnly = true; const p = systemSettings.projects.find(x => x.name === v); block.value = p ? p.blockId : ""; }
+         };
+         
+         window.handleTechSelect = (s) => { const [id, name] = s.value.split('|'); document.querySelector('#createForm [name="techId"]').value = id || ''; document.querySelector('#createForm [name="techName"]').value = name || ''; };
+         
+         document.getElementById('createForm').onsubmit = async (e) => {
+             e.preventDefault();
+             const data = Object.fromEntries(new FormData(e.target).entries());
+             if (data.project === "__add_new__") {
+                 const newName = document.getElementById('custom-project-name').value;
+                 if (!newName) return showToast("Enter project name");
+                 data.project = newName;
+                 await addDoc(getCollectionPath('projects'), { name: newName, blockId: data.blockId });
+             }
+             delete data.techData;
+             await addDoc(getCollectionPath('disputes'), { ...data, status: 'Open', createdAt: serverTimestamp() });
+             e.target.reset(); switchTab('list'); showToast("Submitted!");
+         };
+         
+         function updateFormDropdowns() {
+             const fill = (id, data, key) => { const el = document.getElementById(id); if (el) el.innerHTML = '<option value="">Select Option</option>' + data.map(d => `<option value="${d[key]}">${d[key]}</option>`).join(''); };
+             fill('create-team', systemSettings.teams, 'name');
+             fill('create-rqa-tech', systemSettings.rqaTechs, 'rqaId');
+             const techOptions = '<option value="">Select Technician</option>' + systemSettings.techs.map(t => `<option value="${t.techId}|${t.techName}">${t.techName} (${t.techId})</option>`).join('');
+             document.getElementById('create-tech').innerHTML = techOptions;
+             document.getElementById('leave-tech').innerHTML = techOptions;
+             const projEl = document.getElementById('create-project');
+             if (projEl) projEl.innerHTML = '<option value="">Select Project</option>' + systemSettings.projects.map(p => `<option value="${p.name}">${p.name}</option>`).join('') + '<option value="__add_new__">+ Add New</option>';
+         }
+         
+         window.renderManagementList = (col, data) => {
+         const idMap = { 'projects': 'list-projects', 'techs': 'list-techs', 'teams': 'list-teams', 'rqatechs': 'list-rqatechs' };
+         const el = document.getElementById(idMap[col]); 
+         if (!el) return;
+         
+         el.innerHTML = data.map(d => `
+         <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 mb-2 hover:border-indigo-200 transition-all overflow-hidden">
+             <div class="flex flex-col min-w-0 flex-1 mr-2">
+                 <span class="text-[10px] font-black text-slate-800 uppercase tracking-tight truncate">
+                     ${escapeHtml(d.name || d.techName || d.rqaId)}
+                 </span>
+                 ${d.blockId ? `<span class="text-[9px] text-slate-400 font-bold truncate">Block: ${d.blockId}</span>` : ''}
+             </div>
+             <button onclick="deleteDocItem('${col}', '${d.id}')" class="shrink-0 text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors">
+                 <i data-lucide="trash-2" size="14"></i>
+             </button>
+         </div>
+         `).join('');
+         
+         lucide.createIcons();
+         };
+         
+         window.addItem = async (col, data) => { 
+             if (Object.values(data).some(v => !v)) return showToast("Missing fields");
+             await addDoc(getCollectionPath(col), data); 
+             showToast("Added!");
+             // Clear inputs based on col type
+             if(col === 'projects') { document.getElementById('new-proj-name').value=''; document.getElementById('new-proj-block').value=''; }
+             if(col === 'techs') { document.getElementById('new-tech-name').value=''; document.getElementById('new-tech-id').value=''; }
+             if(col === 'teams') document.getElementById('new-team-name').value='';
+             if(col === 'rqatechs') document.getElementById('new-rqa-id').value='';
+         };
+         
+         window.deleteDocItem = async (col, id) => { if(confirm("Remove?")) { await deleteDoc(getDocPath(col, id)); showToast("Removed"); } };
+         window.saveAutoDeleteSetting = async () => { const days = parseInt(document.getElementById('auto-delete-days').value); if(days > 0) { await setDoc(getDocPath('app_settings', 'general'), { autoDeleteDays: days }); showToast("Settings saved"); } };
+         
+         async function checkAutoDelete() {
+             if (!systemSettings.autoDeleteDays) return;
+             const threshold = new Date(); threshold.setDate(threshold.getDate() - systemSettings.autoDeleteDays);
+             disputesData.filter(d => d.status === 'Resolved' && d.createdAt?.toDate() < threshold).forEach(async d => { await deleteDoc(getDocPath('disputes', d.id)); });
+         }
+         
+         function updateStats() {
+             const total = disputesData.length;
+             const res = disputesData.filter(d => d.status === 'Resolved').length;
+             document.getElementById('stat-total').innerText = total;
+             document.getElementById('stat-pending').innerText = disputesData.filter(d => d.status === 'Open').length;
+             document.getElementById('stat-resolved').innerText = res;
+             document.getElementById('stat-rate').innerText = total > 0 ? Math.round((res/total)*100)+'%' : '0%';
+         }
+         
+         function getStatusClass(s) { return s === 'Resolved' || s === 'Approved' ? 'bg-emerald-100 text-emerald-700' : s === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'; }
+         function getPriorityColor(p) { return p === 'Critical' ? 'bg-red-500 text-white' : p === 'High' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'; }
+         function showToast(m) { const t = document.getElementById("toast"); t.innerText = m; t.className = "show"; setTimeout(() => t.className = "", 3000); }
+         window.closeDetailsModal = () => document.getElementById('detailsModal').classList.add('hidden');
+         window.closeAdminModal = () => document.getElementById('adminModal').classList.add('hidden');
+         window.toggleSidebar = (s) => document.getElementById('sidebar').classList.toggle('-translate-x-full', !s);
+         window.escapeHtml = (t) => t ? t.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])) : '';
+         
+         init();
+      </script>
+   </body>
 </html>
