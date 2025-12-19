@@ -68,7 +68,12 @@
             </button>
         </nav>
 
-        <div class="p-4 border-t border-slate-800">
+        <div class="p-4 border-t border-slate-800 space-y-2">
+            <button onclick="logoutAdmin()" id="logoutBtn" class="admin-only hidden w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors">
+                <i data-lucide="log-out" size="20"></i>
+                <span class="font-medium">Exit Admin</span>
+            </button>
+            
             <button onclick="toggleAdmin()" id="adminBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors group">
                 <i data-lucide="user-cog" size="20" class="group-hover:text-indigo-400"></i>
                 <span id="adminBtnText">Admin Access</span>
@@ -103,7 +108,6 @@
                 </div>
             </div>
 
-            <!-- View: Dashboard List -->
             <div id="view-list" class="fade-in space-y-6">
                 <!-- Stats -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -151,7 +155,9 @@
                                     </th>
                                     <th class="px-6 py-5">Project / Block</th>
                                     <th class="px-6 py-5">Technician</th>
+                                    <th class="px-6 py-5">Priority</th>
                                     <th class="px-6 py-5">Category</th>
+                                    <th class="px-6 py-5">Type</th>
                                     <th class="px-6 py-5">Status</th>
                                     <th class="px-6 py-5 text-right">Actions</th>
                                 </tr>
@@ -191,6 +197,15 @@
                             </div>
                             
                             <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Priority Level</label>
+                                <select name="priority" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Partial Spinner</label>
                                 <select name="partialSpinner" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
                                     <option value="">Select Spinner</option>
@@ -199,6 +214,11 @@
                                     <option value="3">3</option>
                                     <option value="4">4</option>
                                     <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
                                 </select>
                             </div>
                             <div>
@@ -249,7 +269,6 @@
 
             <!-- View: Settings -->
             <div id="view-settings" class="hidden fade-in max-w-6xl mx-auto space-y-8 pb-10">
-                <!-- Auto Delete Setting -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="trash-2" size="18" class="text-indigo-500"></i> Auto-Maintenance</h3>
                     <div class="flex items-center gap-4">
@@ -263,7 +282,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Projects -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="folder" size="18" class="text-indigo-500"></i> Manage Projects</h3>
                         <div class="flex gap-2">
@@ -274,7 +292,6 @@
                         <div id="list-projects" class="max-h-40 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
                     </div>
 
-                    <!-- Technicians -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users" size="18" class="text-indigo-500"></i> Manage Technicians</h3>
                         <div class="flex gap-2">
@@ -285,7 +302,6 @@
                         <div id="list-techs" class="max-h-40 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
                     </div>
 
-                    <!-- Teams -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users-round" size="18" class="text-indigo-500"></i> Manage Teams</h3>
                         <div class="flex gap-2">
@@ -295,7 +311,6 @@
                         <div id="list-teams" class="max-h-40 overflow-y-auto space-y-1 pr-2 no-scrollbar"></div>
                     </div>
 
-                    <!-- RQA Reviewers -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="shield-check" size="18" class="text-indigo-500"></i> Manage RQA Reviewers</h3>
                         <div class="flex gap-2">
@@ -321,7 +336,6 @@
         </div>
     </div>
 
-    <!-- Details Modal -->
     <div id="detailsModal" class="hidden fixed inset-0 bg-slate-900/80 z-[70] flex items-center justify-center p-4">
         <div class="bg-white rounded-[2rem] max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
             <div id="modalHeader" class="p-6 bg-slate-50 border-b flex justify-between items-center">
@@ -443,11 +457,20 @@
             setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
         }
 
+        const getPriorityColor = (p) => {
+            switch(p) {
+                case 'Critical': return 'bg-red-500 text-white';
+                case 'High': return 'bg-orange-100 text-orange-700';
+                case 'Medium': return 'bg-blue-100 text-blue-700';
+                case 'Low': return 'bg-slate-100 text-slate-700';
+                default: return 'bg-slate-100 text-slate-700';
+            }
+        };
+
         window.showDetails = (id) => {
             const d = disputesData.find(x => x.id === id);
             if (!d) return;
             
-            // Helper to determine if we should prefix the copy with the label
             const detailRow = (label, value, copyValue = null) => {
                 const finalCopy = copyValue || value;
                 return `
@@ -468,7 +491,8 @@
                     ${detailRow('Technician ID', d.techId)}
                     ${detailRow('Project Name', d.project)}
                     ${detailRow('Block ID', d.blockId)}
-                    ${detailRow('Partial Spinner', d.partialSpinner, `Partial: ${d.partialSpinner}`)}
+                    ${detailRow('Priority', d.priority || 'Medium')}
+                    ${detailRow('Partial Spinner', d.partialSpinner, `Partial ${d.partialSpinner}`)}
                     ${detailRow('Category', d.category)}
                     ${detailRow('Classification Type', d.type)}
                     ${detailRow('Team Name', d.team)}
@@ -503,7 +527,7 @@
         window.copyAllDetails = () => {
             const d = window.currentDispute;
             if (!d) return;
-            const summary = `TECH: ${d.techName} (${d.techId})\nPROJ: ${d.project} (${d.blockId})\nPARTIAL: ${d.partialSpinner}\nCAT: ${d.category}\nTYPE: ${d.type}\nUID: ${d.fpUid}\nREASON: ${d.reason}`;
+            const summary = `PRIORITY: ${d.priority || 'Medium'}\nTECH: ${d.techName} (${d.techId})\nPROJ: ${d.project} (${d.blockId})\nPARTIAL: Partial ${d.partialSpinner}\nCAT: ${d.category}\nTYPE: ${d.type}\nUID: ${d.fpUid}\nREASON: ${d.reason}`;
             copyText(summary);
         };
 
@@ -530,7 +554,13 @@
                     </td>
                     <td class="px-6 py-4 text-sm text-slate-600">${escapeHtml(item.techName)}</td>
                     <td class="px-6 py-4">
-                         <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg">${escapeHtml(item.category || 'N/A')}</span>
+                        <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase ${getPriorityColor(item.priority || 'Medium')}">${item.priority || 'Medium'}</span>
+                    </td>
+                    <td class="px-6 py-4 text-xs font-bold text-slate-500">
+                        Cat ${escapeHtml(item.category)}
+                    </td>
+                    <td class="px-6 py-4 text-xs font-bold text-slate-500">
+                        ${escapeHtml(item.type)}
                     </td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${item.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700' : item.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">${item.status}</span>
@@ -577,8 +607,23 @@
         };
 
         window.toggleAdmin = () => { if (window.isAdmin) { window.isAdmin = false; applyAdminState(); } else { document.getElementById('adminModal').classList.remove('hidden'); } };
+        
+        window.logoutAdmin = () => {
+            window.isAdmin = false;
+            applyAdminState();
+            switchTab('list');
+            showToast("Logged out from Admin mode");
+        };
+
         window.verifyPin = () => { if (document.getElementById('adminPinInput').value === systemSettings.adminPin) { window.isAdmin = true; applyAdminState(); document.getElementById('adminModal').classList.add('hidden'); } else { alert('Wrong PIN'); } document.getElementById('adminPinInput').value = ''; };
-        function applyAdminState() { document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !window.isAdmin)); document.getElementById('adminBadge').classList.toggle('hidden', !window.isAdmin); renderMainTable(); }
+        
+        function applyAdminState() { 
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !window.isAdmin)); 
+            document.getElementById('adminBadge').classList.toggle('hidden', !window.isAdmin); 
+            const btnText = document.getElementById('adminBtnText');
+            if(btnText) btnText.innerText = window.isAdmin ? "Admin Active" : "Admin Access";
+            renderMainTable(); 
+        }
         
         document.getElementById('createForm').onsubmit = async (e) => {
             e.preventDefault();
