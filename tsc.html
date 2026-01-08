@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Segment Randomizer | Pro Edition</title>
+    <script src="https://cdn.tailwindcss.com/3.4.3"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-primary: #3b82f6;
+            --brand-success: #10b981;
+            --brand-danger: #ef4444;
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --border-color: #334155;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Table Styling */
+        .data-grid th {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            background: #1e293b;
+            border-bottom: 2px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-grid td {
+            border-bottom: 1px solid #334155;
+            transition: background 0.2s ease;
+        }
+
+        .data-grid tr:hover td {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        /* Input Styling */
+        select, input {
+            background-color: #0f172a !important;
+            border: 1px solid #334155 !important;
+            transition: all 0.2s ease !important;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--brand-primary) !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+            outline: none !important;
+        }
+
+        /* Modal Blur */
+        .modal {
+            backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .card-shadow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-[1500px] mx-auto">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-6">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
+                    <span class="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
+                    Time Segment Randomizer
+                </h1>
+                <p class="text-slate-400 mt-1 text-sm">Enterprise shifting and time-log automation.</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3 bg-slate-800/40 p-3 rounded-2xl border border-slate-700/50">
+                <button id="randomizeButton" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/10 active:scale-95">
+                    Randomize
+                </button>
+                <button id="insertTaskButton" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95">
+                    + New Task
+                </button>
+                <div class="flex items-center gap-2 bg-slate-900/80 p-1 px-2 rounded-lg border border-slate-700">
+                    <label for="mainDateSelector" class="text-[9px] font-black text-slate-500 uppercase">Date</label>
+                    <input type="date" id="mainDateSelector" class="bg-transparent border-none text-xs font-bold text-blue-400 focus:ring-0 cursor-pointer p-0">
+                </div>
+                <div class="h-6 w-[1px] bg-slate-700 mx-1"></div>
+                <button id="copyButton" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 active:scale-95">
+                    Copy
+                </button>
+                <button id="settingsButton" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl border border-slate-700 transition-all flex items-center gap-2 text-xs font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Settings
+                </button>
+            </div>
+        </div>
+
+        <div id="durationWarning" class="hidden mb-6 p-4 bg-amber-900/20 border border-amber-500/50 rounded-xl flex items-start gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <div class="text-amber-200 text-sm font-medium"></div>
+        </div>
+
+        <div class="bg-[#1e293b] rounded-2xl border border-slate-700 card-shadow overflow-hidden">
+            <div class="overflow-x-auto max-h-[75vh]">
+                <table class="data-grid w-full border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-4 text-left">Tech #</th>
+                            <th class="px-6 py-4 text-left">User</th>
+                            <th class="px-6 py-4 text-left">Shift</th>
+                            <th class="px-6 py-4 text-left">Date</th>
+                            <th class="px-6 py-4 text-left">Time In</th>
+                            <th class="px-6 py-4 text-left">Time Out</th>
+                            <th class="px-6 py-4 text-left">Duration</th>
+                            <th class="px-6 py-4 text-left">Main Category</th>
+                            <th class="px-6 py-4 text-left">Sub Category</th>
+                            <th class="px-6 py-4 text-left">OT</th>
+                            <th class="px-6 py-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timeTableBody" class="text-sm font-medium"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="messageBox" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 font-bold z-[3000]"></div>
+    </div>
+
+    <div id="settingsModal" class="modal fixed inset-0 flex items-center justify-center p-4 z-[1000] hidden">
+        <div class="bg-[#1e293b] w-full max-w-4xl rounded-3xl border border-slate-700 overflow-hidden shadow-2xl">
+            <div class="px-8 py-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+                <h3 class="text-xl font-bold flex items-center gap-2">Configuration Settings</h3>
+                <button id="closeSettingsModalButton" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-400 hover:text-white transition-all">&times;</button>
+            </div>
+            <div class="p-8 grid md:grid-cols-2 gap-8 max-h-[70vh] overflow-y-auto">
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">Schedule Presets</label>
+                        <div class="flex gap-2">
+                            <select id="selectScheduleDropdown" class="w-full rounded-xl p-3 text-sm font-medium"></select>
+                            <button id="deleteScheduleButton" class="bg-red-500/10 text-red-400 px-4 border border-red-500/20 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                        </div>
+                        <button id="generateScheduleButton" class="w-full mt-3 bg-blue-600/10 text-blue-400 border border-blue-500/20 py-3 rounded-xl text-xs font-bold hover:bg-blue-600/20 transition-all uppercase tracking-widest">New Preset Generator</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                        <div class="col-span-1"><label class="text-[10px] font-bold text-slate-400 mb-1 block uppercase">Tech #</label><input type="text" id="techNumberInput" class="w-full rounded-xl p-3 text-sm font-bold"></div>
+                        <div class="col-span-1"><label class="text-[10px] font-bold text-slate-400 mb-1 block uppercase">User</label><input type="text" id="usernameInput" class="w-full rounded-xl p-3 text-sm font-bold"></div>
+                        <div><label class="text-[10px] font-bold text-slate-400 mb-1 block uppercase">Shift</label><select id="shiftInput" class="w-full rounded-xl p-3 text-sm"><option>Day</option><option>Night</option></select></div>
+                        <div><label class="text-[10px] font-bold text-slate-400 mb-1 block uppercase">Effective Date (Settings)</label><input type="date" id="dateInput" class="w-full rounded-xl p-3 text-sm"></div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="bg-slate-900/40 p-6 rounded-2xl border border-slate-800">
+                        <h4 class="text-xs font-black text-blue-400 mb-5 uppercase tracking-widest">Global Defaults</h4>
+                        <div class="space-y-4">
+                            <div><label class="text-[10px] font-bold text-slate-400 mb-1 block uppercase">Main Category</label><select id="mainCatSelect" class="w-full rounded-xl p-3 text-sm"></select></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 mb-1 block uppercase">Sub Category</label><select id="subCatSelect" class="w-full rounded-xl p-3 text-sm"></select></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 mb-1 block uppercase">OT Eligibility</label><select id="otInput" class="w-full rounded-xl p-3 text-sm font-bold"><option value="NO">NO</option><option value="YES">YES</option></select></div>
+                        </div>
+                    </div>
+                    <div class="p-4 border-2 border-dashed border-slate-800 rounded-2xl">
+                         <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Data Management</label>
+                         <button id="clearDataButtonSettings" class="w-full bg-red-900/20 text-red-500 border border-red-900/40 py-3 rounded-xl text-xs font-black hover:bg-red-500 hover:text-white transition-all uppercase tracking-widest">Wipe Local Data & Reset</button>
+                    </div>
+                </div>
+            </div>
+            <div class="px-8 py-6 bg-slate-900/80 border-t border-slate-700 flex justify-between items-center">
+                <button id="resetSettingsButton" class="text-slate-500 hover:text-amber-400 text-[10px] font-black uppercase tracking-widest transition-all">Revert to Defaults</button>
+                <div class="flex gap-4">
+                    <button id="cancelSettingsButton" class="px-6 py-3 rounded-xl text-slate-300 font-bold hover:bg-slate-800 transition-all text-sm">Dismiss</button>
+                    <button id="saveSettingsButton" class="px-10 py-3 bg-blue-600 rounded-xl text-white font-black hover:bg-blue-500 transition-all text-sm shadow-lg shadow-blue-500/20 active:scale-95">Apply Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scheduleModal" class="modal fixed inset-0 flex items-center justify-center p-4 z-[1100] hidden">
+        <div class="bg-[#1e293b] w-full max-w-md rounded-3xl border border-slate-700 shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-700 bg-slate-800/50"><h3 class="font-bold">Preset Generator</h3></div>
+            <div class="p-6 space-y-4">
+                <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Name</label><input type="text" id="scheduleTemplateNameInput" placeholder="e.g. Regular Shift" class="w-full rounded-xl p-3 text-sm"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">IN</label><input type="time" id="schedTimeIn" class="w-full rounded-xl p-3"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 block mb-1 uppercase">OUT</label><input type="time" id="schedTimeOut" class="w-full rounded-xl p-3"></div>
+                </div>
+                <div class="p-4 bg-slate-900/50 rounded-2xl border border-slate-800 space-y-3">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Breaks</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="time" id="schedBreak1" class="rounded-lg p-2 text-xs">
+                        <input type="time" id="schedLunch" class="rounded-lg p-2 text-xs">
+                        <input type="time" id="schedBreak2" class="rounded-lg p-2 text-xs">
+                    </div>
+                </div>
+                <div id="scheduleErrorMessage" class="text-red-400 text-[10px] font-bold uppercase min-h-[1rem]"></div>
+            </div>
+            <div class="p-6 bg-slate-900/80 flex justify-end gap-3">
+                <button id="saveScheduleTemplateButton" class="text-xs font-bold text-blue-400 uppercase tracking-widest px-4 hover:bg-blue-500/10 rounded-xl">Save Template</button>
+                <button id="applyScheduleButton" class="bg-blue-600 px-8 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-500">Apply</button>
+                <button id="cancelScheduleButton" class="text-slate-400 text-sm px-4">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="insertTaskModal" class="modal fixed inset-0 flex items-center justify-center p-4 z-[1200] hidden">
+        <div class="bg-[#1e293b] w-full max-w-lg rounded-3xl border border-slate-700 shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50"><h3 class="font-bold">Split Segment</h3><button id="closeTaskModalButton" class="text-slate-500 text-2xl">&times;</button></div>
+            <div class="p-8 space-y-5">
+                <div><label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Target Interval</label><select id="taskSegmentSelect" class="w-full rounded-xl p-3 font-medium text-sm"></select></div>
+                <div><label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Offset (Minutes from start)</label><input type="number" id="taskDurationInput" class="w-full rounded-xl p-3 text-sm font-bold"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Category</label><select id="taskMainCatSelect" class="w-full rounded-xl p-3 text-sm"></select></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Sub</label><select id="taskSubCatSelect" class="w-full rounded-xl p-3 text-sm"></select></div>
+                </div>
+                <div id="taskErrorMessage" class="text-red-400 text-[10px] font-bold uppercase"></div>
+            </div>
+            <div class="p-6 bg-slate-900/80 flex justify-end gap-4">
+                <button id="cancelTaskButton" class="text-slate-400 font-bold px-4">Cancel</button>
+                <button id="applyTaskButton" class="bg-emerald-600 px-8 py-3 rounded-xl font-black hover:bg-emerald-500 transition-all text-sm shadow-lg shadow-emerald-500/20">Confirm Split</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // --- ELEMENT REFERENCES ---
+    const timeTableBody = document.getElementById('timeTableBody'), 
+          randomizeButton = document.getElementById('randomizeButton'), 
+          copyButton = document.getElementById('copyButton'), 
+          messageBox = document.getElementById('messageBox'), 
+          insertTaskButton = document.getElementById('insertTaskButton'), 
+          settingsButton = document.getElementById('settingsButton'), 
+          durationWarning = document.getElementById('durationWarning'),
+          mainDateSelector = document.getElementById('mainDateSelector');
+
+    const settingsModal = document.getElementById('settingsModal'), saveSettingsButton = document.getElementById('saveSettingsButton'), cancelSettingsButton = document.getElementById('cancelSettingsButton'), closeSettingsModalButton = document.getElementById('closeSettingsModalButton'), resetSettingsButton = document.getElementById('resetSettingsButton');
+    const clearDataButtonSettings = document.getElementById('clearDataButtonSettings');
+    const selectScheduleDropdown = document.getElementById('selectScheduleDropdown'), deleteScheduleButton = document.getElementById('deleteScheduleButton');
+    const scheduleModal = document.getElementById('scheduleModal'), generateScheduleButton = document.getElementById('generateScheduleButton'), applyScheduleButton = document.getElementById('applyScheduleButton'), cancelScheduleButton = document.getElementById('cancelScheduleButton'), saveScheduleTemplateButton = document.getElementById('saveScheduleTemplateButton'), scheduleErrorMessage = document.getElementById('scheduleErrorMessage');
+    const insertTaskModal = document.getElementById('insertTaskModal'), closeTaskModalButton = document.getElementById('closeTaskModalButton'), applyTaskButton = document.getElementById('applyTaskButton'), cancelTaskButton = document.getElementById('cancelTaskButton'), taskErrorMessage = document.getElementById('taskErrorMessage');
+
+    // --- GLOBAL STATE ---
+    const LOCAL_STORAGE_KEY = 'timeRandomizerSettings_v30_prod';
+    const SCHEDULE_TEMPLATES_KEY = 'timeRandomizerScheduleTemplates_v3';
+    const DURATION_LIMIT_SECONDS = 27000;
+    const categoryData = { "BREAK": ["BREAK"], "SARANAC": ["CF"], "ACCUPLUS": ["DEM", "I3", "PCS", "REFIX", "i3QA", "RQA"], "DOWNTIME": ["NoProject"], "TRAINING": ["Formal - Accuplus"] };
+    
+    let currentSettings = {}, currentDisplayedData = [], randomizedTimes = [];
+    let messageTimeout = null;
+
+    // --- UTILITIES ---
+    function fTime(c) { return String(c).padStart(2, '0'); }
+    function t2M(t) { const [h=0, m=0] = (t || "0:0").split(':').map(Number); return h * 60 + m; }
+    function t2S(t) { if (!t) return 0; const p = t.split(':'); return (parseInt(p[0])*3600) + (parseInt(p[1])*60) + (parseInt(p[2]) || 0); }
+    function s2T(ts) { const h = Math.floor(ts/3600), m = Math.floor((ts%3600)/60), s = ts%60; return `${fTime(h)}:${fTime(m)}:${fTime(s)}`; }
+    function addM(t, mins) { const tot = t2M(t) + mins; return `${fTime(Math.floor(tot / 60) % 24)}:${fTime(tot % 60)}`; }
+    function c12_24(h12, p) { let h24 = parseInt(h12); if (p === 'PM' && h24 !== 12) h24 += 12; else if (p === 'AM' && h24 === 12) h24 = 0; return h24; }
+    function c24_12(h24, min) { const p = h24 >= 12 ? 'PM' : 'AM'; let h12 = h24 % 12; if (h12 === 0) h12 = 12; return { h: h12, m: parseInt(min), p }; }
+    function tPtObj(t) { const p = t.split(':'), h24 = p[0], m = p[1], s = p[2] || '00', conv = c24_12(parseInt(h24), parseInt(m)); return { originalReferenceTime: `${h24}:${m}:${s}`, curH: conv.h, curM: conv.m, curP: conv.p, override: null, isTask: false }; }
+
+    // --- CORE LOGIC ---
+    function getDef() {
+        const d = new Date(), loc = new Date(d.getTime() - (d.getTimezoneOffset()*60*1000));
+        return { techNumber: '7236', username: 'lorens.ebrado', shift: 'Day', date: loc.toISOString().split('T')[0], ot: 'NO', categoryPair1: { main: 'DOWNTIME', sub: 'NoProject' }, timePoints: defPts() };
+    }
+
+    function defPts() {
+        const segs = [ "13:45:00", "15:30:00", "13:30:00", "12:00:00", "11:00:00", "08:45:00", "08:30:00", "06:30:00" ];
+        return [...new Set(segs)].sort((a,b) => t2M(a)-t2M(b)).map(s => tPtObj(s));
+    }
+
+    function init(force = false) {
+        if (force) { localStorage.removeItem(LOCAL_STORAGE_KEY); localStorage.removeItem(SCHEDULE_TEMPLATES_KEY); }
+        const s = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (s) { try { currentSettings = { ...getDef(), ...JSON.parse(s) }; } catch (e) {} }
+        else { currentSettings = getDef(); }
+        mainDateSelector.value = currentSettings.date;
+    }
+
+    function run(random = true) {
+        const { timePoints } = currentSettings;
+        if (timePoints.length < 2) return;
+        const dates = []; let cD = new Date(currentSettings.date + 'T12:00:00Z'); dates[0] = cD.toISOString().slice(0,10);
+        for (let i = 1; i < timePoints.length; i++) {
+            if (c12_24(timePoints[i].curH, timePoints[i].curP)*60+timePoints[i].curM < c12_24(timePoints[i-1].curH, timePoints[i-1].curP)*60+timePoints[i-1].curM) cD.setDate(cD.getDate()+1);
+            dates[i] = cD.toISOString().slice(0,10);
+        }
+        if (random || randomizedTimes.length !== timePoints.length) {
+            randomizedTimes = timePoints.map(tp => `${fTime(c12_24(tp.curH, tp.curP))}:${fTime(tp.curM)}:${fTime(Math.floor(Math.random()*60))}`);
+        }
+        const data = [];
+        for (let i = 0; i < timePoints.length - 1; i++) {
+            const sP = timePoints[i], nP = timePoints[i+1];
+            let cat, ot;
+            if (sP.override) { cat = sP.override; ot = sP.override.ot || currentSettings.ot; }
+            else {
+                let diff = (c12_24(nP.curH, nP.curP)*60+nP.curM) - (c12_24(sP.curH, sP.curP)*60+sP.curM);
+                if (diff < 0) diff += 1440;
+                if (diff === 15 || diff === 60) { cat = { main: 'BREAK', sub: 'BREAK' }; ot = 'NO'; }
+                else { cat = currentSettings.categoryPair1; ot = currentSettings.ot; }
+            }
+            const s24 = randomizedTimes[i], e24 = randomizedTimes[i+1];
+            let sS = t2S(s24), eS = t2S(e24); if (eS < sS) eS += 86400;
+            const s12 = c24_12(parseInt(s24.split(':')[0]), s24.split(':')[1]);
+            const e12 = c24_12(parseInt(e24.split(':')[0]), e24.split(':')[1]);
+            data.push({ ...currentSettings, date: dates[i], start: `${s12.h}:${fTime(s12.m)}:${s24.split(':')[2]} ${s12.p}`, end: `${e12.h}:${fTime(e12.m)}:${e24.split(':')[2]} ${e12.p}`, start24: s24, end24: e24, dur: s2T(eS-sS), main: cat.main, sub: cat.sub, ot: ot });
+        }
+        currentDisplayedData = data.reverse(); updateTable(); checkH();
+    }
+
+    function checkH() {
+        let tot = 0;
+        currentDisplayedData.forEach(e => { if(e.main !== 'BREAK') { const p = e.dur.split(':'); tot += (parseInt(p[0])*3600)+(parseInt(p[1])*60)+parseInt(p[2]); } });
+        durationWarning.classList.toggle('hidden', tot <= DURATION_LIMIT_SECONDS);
+        if (tot > DURATION_LIMIT_SECONDS) durationWarning.querySelector('div').textContent = `Shift Limit Warning: ${s2T(tot)} exceeds the 07:30:00 max work duration.`;
+    }
+
+    function updateTable() {
+        timeTableBody.innerHTML = '';
+        currentDisplayedData.forEach((e, dI) => {
+            const cI = (currentSettings.timePoints.length - 2) - dI, endP = currentSettings.timePoints[cI + 1], tr = document.createElement('tr');
+            tr.innerHTML = `<td class="px-6 py-4 text-slate-500 font-bold">${e.techNumber}</td><td class="px-6 py-4">${e.username}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-md text-[10px] bg-slate-800 border border-slate-700 uppercase">${e.shift}</span></td><td class="px-6 py-4 mono text-xs text-slate-400">${e.date}</td><td class="px-6 py-4 mono text-blue-400 font-medium">${e.start}</td><td class="px-6 py-4 mono text-blue-400 font-medium">${e.end}</td><td class="px-6 py-4 font-bold text-slate-200">${e.dur}</td>`;
+            
+            const mC = document.createElement('td'), mS = document.createElement('select');
+            mS.className = "px-6 py-4 bg-transparent border-none text-xs font-bold w-full";
+            mS.innerHTML = Object.keys(categoryData).map(k => `<option value="${k}" ${k === e.main ? 'selected' : ''}>${k}</option>`).join('');
+            mC.appendChild(mS);
+            
+            const sC = document.createElement('td'), sS = document.createElement('select');
+            sS.className = "px-6 py-4 bg-transparent border-none text-xs w-full";
+            const updateS = () => { const os = categoryData[mS.value] || []; sS.innerHTML = os.map(o => `<option value="${o}">${o}</option>`).join(''); };
+            updateS(); sS.value = e.sub;
+            sC.appendChild(sS);
+            
+            const oC = document.createElement('td'), oS = document.createElement('select');
+            oS.className = "px-6 py-4 bg-transparent border-none text-[10px] font-black " + (e.ot === 'YES' ? 'text-emerald-500' : 'text-slate-500');
+            oS.innerHTML = `<option value="NO" ${e.ot === 'NO' ? 'selected' : ''}>NO</option><option value="YES" ${e.ot === 'YES' ? 'selected' : ''}>YES</option>`;
+            oC.appendChild(oS);
+            
+            const aC = document.createElement('td'); aC.className = "px-6 py-4 text-center";
+            if (endP.isTask) {
+                const b = document.createElement('button'); b.textContent = 'Remove'; b.className = 'text-[10px] text-red-500 font-bold hover:underline uppercase';
+                b.onclick = () => { currentSettings.timePoints[cI].override = null; currentSettings.timePoints.splice(cI + 1, 1); localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentSettings)); run(true); showMsg("Merged Segments"); };
+                aC.appendChild(b);
+            }
+            tr.append(mC, sC, oC, aC); timeTableBody.appendChild(tr);
+
+            mS.onchange = () => { updateS(); override(cI, mS.value, sS.value, oS.value); };
+            sS.onchange = () => override(cI, mS.value, sS.value, oS.value);
+            oS.onchange = () => { oS.className = "px-6 py-4 bg-transparent border-none text-[10px] font-black " + (oS.value === 'YES' ? 'text-emerald-500' : 'text-slate-500'); override(cI, mS.value, sS.value, oS.value); };
+        });
+    }
+
+    function override(idx, m, s, o) { currentSettings.timePoints[idx].override = { main: m, sub: s, ot: o }; localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentSettings)); run(false); }
+    
+    function showMsg(m, isE = false) {
+        if (messageTimeout) clearTimeout(messageTimeout);
+        messageBox.textContent = m; 
+        messageBox.className = `fixed bottom-8 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl shadow-2xl transition-all duration-300 transform z-[3000] opacity-100 translate-y-0 ${isE ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'}`;
+        
+        messageTimeout = setTimeout(() => { 
+            messageBox.classList.add('opacity-0', 'translate-y-20'); 
+        }, 5000);
+    }
+
+    // --- LISTENERS ---
+    document.addEventListener('DOMContentLoaded', () => {
+        mainDateSelector.onchange = (ev) => {
+            if (!isNaN(Date.parse(ev.target.value))) {
+                currentSettings.date = ev.target.value;
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentSettings));
+                run(false);
+                showMsg(`Date set to ${ev.target.value}`);
+            }
+        };
+
+        randomizeButton.onclick = () => run(true);
+        copyButton.onclick = () => {
+            const txt = currentDisplayedData.map(e => `${e.techNumber}\t${e.username}\t${e.shift}\t${e.date}\t${e.start24}\t${e.end24}\t${e.dur}\t${e.main}\t${e.sub}\t${e.ot}`).join('\n');
+            navigator.clipboard.writeText(txt).then(() => showMsg('Grid Data Copied'));
+        };
+        settingsButton.onclick = () => {
+            ['techNumber','username','shift','date','ot'].forEach(p => document.getElementById(p+'Input').value = currentSettings[p]);
+            const m = document.getElementById('mainCatSelect'), s = document.getElementById('subCatSelect');
+            m.innerHTML = Object.keys(categoryData).filter(k=>k!=="BREAK").map(k => `<option value="${k}">${k}</option>`).join('');
+            m.value = currentSettings.categoryPair1.main; 
+            const upS = () => { s.innerHTML = (categoryData[m.value] || []).map(o => `<option value="${o}">${o}</option>`).join(''); };
+            m.onchange = upS; upS(); s.value = currentSettings.categoryPair1.sub;
+            popT(); settingsModal.classList.remove('hidden');
+        };
+        saveSettingsButton.onclick = () => {
+            ['techNumber','username','shift','date','ot'].forEach(p => currentSettings[p] = document.getElementById(p+'Input').value);
+            currentSettings.categoryPair1 = { main: document.getElementById('mainCatSelect').value, sub: document.getElementById('subCatSelect').value };
+            mainDateSelector.value = currentSettings.date;
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentSettings)); settingsModal.classList.add('hidden'); run(true); showMsg('Settings Applied');
+        };
+        cancelSettingsButton.onclick = closeSettingsModalButton.onclick = () => settingsModal.classList.add('hidden');
+        
+        clearDataButtonSettings.onclick = () => { if(confirm("This will permanently delete ALL settings. Proceed?")) { init(true); settingsModal.classList.add('hidden'); run(true); showMsg("All Data Wiped", true); }};
+        resetSettingsButton.onclick = () => { if(confirm("Reset to factory defaults?")) { currentSettings = getDef(); localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentSettings)); mainDateSelector.value = currentSettings.date; run(true); showMsg("Defaults Restored"); }};
+
+        generateScheduleButton.onclick = () => { scheduleErrorMessage.textContent = ''; scheduleModal.classList.remove('hidden'); };
+        cancelScheduleButton.onclick = () => scheduleModal.classList.add('hidden');
+        applyScheduleButton.onclick = () => {
+            const t = { in: document.getElementById('schedTimeIn').value, b1: document.getElementById('schedBreak1').value, l: document.getElementById('schedLunch').value, b2: document.getElementById('schedBreak2').value, out: document.getElementById('schedTimeOut').value };
+            if(!t.in || !t.out) return scheduleErrorMessage.textContent = 'In/Out required';
+            const raw = [ t.in, t.b1, addM(t.b1, 15), t.l, addM(t.l, 60), t.b2, addM(t.b2, 15), t.out ].filter(x => !x.includes('NaN'));
+            currentSettings.timePoints = raw.map(x => tPtObj(x)); localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentSettings)); scheduleModal.classList.add('hidden'); settingsModal.classList.add('hidden'); run(true);
+        };
+        saveScheduleTemplateButton.onclick = () => {
+            const n = document.getElementById('scheduleTemplateNameInput').value; if(!n) return;
+            const ts = JSON.parse(localStorage.getItem(SCHEDULE_TEMPLATES_KEY)) || [];
+            ts.push({ name: n, times: { in: document.getElementById('schedTimeIn').value, b1: document.getElementById('schedBreak1').value, l: document.getElementById('schedLunch').value, b2: document.getElementById('schedBreak2').value, out: document.getElementById('schedTimeOut').value }});
+            localStorage.setItem(SCHEDULE_TEMPLATES_KEY, JSON.stringify(ts)); popT(); showMsg('Preset Saved');
+        };
+        insertTaskButton.onclick = () => {
+            const s = document.getElementById('taskSegmentSelect'); s.innerHTML = '';
+            currentDisplayedData.forEach((e, i) => { if(e.main !== 'BREAK') s.innerHTML += `<option value="${i}">${e.start} - ${e.end}</option>`; });
+            const m = document.getElementById('taskMainCatSelect'), sb = document.getElementById('taskSubCatSelect');
+            m.innerHTML = Object.keys(categoryData).filter(k=>k!=="BREAK").map(k => `<option value="${k}">${k}</option>`).join('');
+            const upSb = () => { sb.innerHTML = (categoryData[m.value] || []).map(o => `<option value="${o}">${o}</option>`).join(''); };
+            m.onchange = upSb; upSb(); insertTaskModal.classList.remove('hidden');
+        };
+        applyTaskButton.onclick = () => {
+            const i = (currentSettings.timePoints.length-2) - parseInt(document.getElementById('taskSegmentSelect').value);
+            const m = parseInt(document.getElementById('taskDurationInput').value); if(!m) return;
+            const startP = currentSettings.timePoints[i], endP = currentSettings.timePoints[i+1];
+            let sS = t2S(startP.originalReferenceTime), eS = t2S(endP.originalReferenceTime); if(eS<sS) eS+=86400;
+            const nP = tPtObj(s2T((sS + m*60)%86400)); nP.isTask = true;
+            startP.override = { main: document.getElementById('taskMainCatSelect').value, sub: document.getElementById('taskSubCatSelect').value, ot: currentSettings.ot };
+            currentSettings.timePoints.splice(i+1, 0, nP); localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentSettings)); run(true); insertTaskModal.classList.add('hidden');
+        };
+        cancelTaskButton.onclick = closeTaskModalButton.onclick = () => insertTaskModal.classList.add('hidden');
+
+        function popT() {
+            const ts = JSON.parse(localStorage.getItem(SCHEDULE_TEMPLATES_KEY)) || [];
+            selectScheduleDropdown.innerHTML = '<option value="-1">Load Preset...</option><option value="default">System Default</option>';
+            ts.forEach((t, i) => { const o = document.createElement('option'); o.value = i; o.textContent = t.name; selectScheduleDropdown.appendChild(o); });
+        }
+        selectScheduleDropdown.onchange = () => {
+            const v = selectScheduleDropdown.value; if(v==="-1") return;
+            if(v==='default') currentSettings.timePoints = defPts();
+            else {
+                const t = (JSON.parse(localStorage.getItem(SCHEDULE_TEMPLATES_KEY)) || [])[v].times;
+                currentSettings.timePoints = [ t.in, t.b1, addM(t.b1, 15), t.l, addM(t.l, 60), t.b2, addM(t.b2, 15), t.out ].map(x => tPtObj(x));
+            }
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentSettings)); run(true);
+        };
+        deleteScheduleButton.onclick = () => {
+            const v = selectScheduleDropdown.value; if(v === "-1" || v === "default") return;
+            let ts = JSON.parse(localStorage.getItem(SCHEDULE_TEMPLATES_KEY)) || []; ts.splice(v,1);
+            localStorage.setItem(SCHEDULE_TEMPLATES_KEY, JSON.stringify(ts)); popT();
+        };
+
+        init(); run(true);
+    });
+</script>
+</body>
+</html>
