@@ -482,139 +482,116 @@
          
          // --- START SMART PASTE LOGIC ---
          window.handleSmartPaste = () => {
-         const area = document.getElementById('smartPasteArea');
-         const input = area.value.trim();
-         if (!input) return;
-         
-         // Split by tab (Excel/Sheets) or commas
-         const lines = input.split('\n');
-         const headers = lines[0].split('\t').map(h => h.trim());
-         const dataRow = lines.length > 1 ? lines[1].split('\t') : lines[0].split('\t');
-         
-         const getVal = (possibleHeaders) => {
-         const idx = headers.findIndex(h => possibleHeaders.some(ph => h.toLowerCase() === ph.toLowerCase()));
-         return idx !== -1 ? dataRow[idx]?.trim() : null;
-         };
-         
-         // 1. Project & Block ID (Preserved Logic)
-         const rawLayer = getVal(['Layer', 'Project', 'Project Name']);
-         if (rawLayer) {
-         const blockMatch = rawLayer.match(/^\d{4}/);
-         if (blockMatch) {
-             document.getElementById('create-blockId').value = blockMatch[0];
-         }
-         
-         let trimmedName = rawLayer;
-         // Case-insensitive search for 'fixpoints'
-         const fixIdx = rawLayer.toLowerCase().indexOf('fixpoints');
-         if (fixIdx !== -1) trimmedName = rawLayer.substring(0, fixIdx + 9);
-         const underscores = [...rawLayer.matchAll(/_/g)].map(m => m.index);
-         // Cut at 5th underscore (gives "XXXX_A_B_C_D_E" -> "XXXX_A_B_C_D")
-         if (underscores.length >= 5) {
-             const fifth = underscores[4];
-             if (fixIdx === -1 || fifth < fixIdx) trimmedName = rawLayer.substring(0, fifth);
-         }
-         
-         const projSelect = document.getElementById('create-project');
-         const exists = Array.from(projSelect.options).some(o => o.value === trimmedName);
-         if (exists) {
-             projSelect.value = trimmedName;
-             handleProjectChange(trimmedName); // triggers Block ID auto-fill from DB
-         } else {
-             projSelect.value = "__add_new__";
-             handleProjectChange("__add_new__"); // shows custom input, clears block
-             document.getElementById('custom-project-name').value = trimmedName;
-             // Override block ID from pasted data if available
-             if (blockMatch) {
-                 document.getElementById('create-blockId').value = blockMatch[0];
+             const area = document.getElementById('smartPasteArea');
+             const input = area.value.trim();
+             if (!input) return;
+
+             // Parse tab-separated header + data row
+             const lines = input.split('\n').filter(l => l.trim());
+             if (lines.length < 2) return showToast("Paste both header and data row");
+             const headers = lines[0].split('\t').map(h => h.trim().toLowerCase());
+             const dataRow  = lines[1].split('\t').map(v => v.trim());
+
+             // Case-insensitive column lookup
+             const getVal = (...names) => {
+                 for (const name of names) {
+                     const idx = headers.indexOf(name.toLowerCase());
+                     if (idx !== -1 && dataRow[idx]) return dataRow[idx];
+                 }
+                 return null;
+             };
+
+             // 1. Project Name & Block ID — from 'layer' column
+             const rawLayer = getVal('layer', 'Layer', 'Project', 'Project Name');
+             if (rawLayer) {
+                 // Block ID = first 4 digits
+                 const blockMatch = rawLayer.match(/^\d{4}/);
+                 if (blockMatch) document.getElementById('create-blockId').value = blockMatch[0];
+
+                 // Trim project name: cut at 'FixPoints' (case-insensitive) inclusive
+                 let trimmedName = rawLayer;
+                 const fixIdx = rawLayer.toLowerCase().indexOf('fixpoints');
+                 if (fixIdx !== -1) {
+                     trimmedName = rawLayer.substring(0, fixIdx + 9);
+                 } else {
+                     // Fallback: cut at 5th underscore
+                     const underscores = [...rawLayer.matchAll(/_/g)].map(m => m.index);
+                     if (underscores.length >= 5) trimmedName = rawLayer.substring(0, underscores[4]);
+                 }
+
+                 const projSelect = document.getElementById('create-project');
+                 const exists = Array.from(projSelect.options).some(o => o.value === trimmedName);
+                 if (exists) {
+                     projSelect.value = trimmedName;
+                     handleProjectChange(trimmedName);
+                 } else {
+                     projSelect.value = "__add_new__";
+                     handleProjectChange("__add_new__");
+                     document.getElementById('custom-project-name').value = trimmedName;
+                     if (blockMatch) document.getElementById('create-blockId').value = blockMatch[0];
+                 }
              }
-         }
-         }
-         
-         // 2. Technician ID & Auto-fill Name (FIX1_ID)
-         const techId = getVal(['FIX1_ID', 'Technician ID', 'Tech ID']);
-         if (techId) {
-         const techSelect = document.getElementById('create-tech');
-         const option = Array.from(techSelect.options).find(o => o.value.startsWith(techId));
-         if (option) {
-             techSelect.value = option.value;
-             handleTechSelect(techSelect); 
-         }
-         }
-         
-         // 3. RQA Reviewer (RV1_ID)
-         const rqaId = getVal(['RV1_ID', 'RQA Reviewer']);
-         if (rqaId) {
-         const rqaSelect = document.getElementById('create-rqa-tech');
-         if (Array.from(rqaSelect.options).some(o => o.value === rqaId)) {
-             rqaSelect.value = rqaId;
-         }
-         }
-         
-         // 4. Type Mapping (RV1_LABEL -> I:Incorrect, S:Skip, C:Change)
-         const label = getVal(['RV1_LABEL', 'Type']);
-         if (label) {
-         const typeSelect = document.querySelector('select[name="type"]');
-         const typeMap = { 'I': 'Incorrect', 'S': 'Skip', 'C': 'Change' };
-         const mappedValue = typeMap[label.toUpperCase()];
-         if (mappedValue) {
-             typeSelect.value = mappedValue;
-         }
-         }
-         
-         // 5. Dispute Reason (FIX2_NOTES) - UPDATED TO TARGET TEXTAREA CORRECTLY
-         const notes = getVal(['FIX2_NOTES', 'Reason', 'Dispute Reason']);
-         if (notes) {
-         // Targets the textarea by name within the createForm
-         const reasonField = document.querySelector('#createForm textarea[name="reason"]');
-         if (reasonField) {
-             reasonField.value = notes;
-         }
-         }
-         
-         // 6. Auto-select Team
-         const teamSelect = document.getElementById('create-team');
-         if (teamSelect && (teamSelect.value === "" || teamSelect.value === "Select Option") && teamSelect.options.length > 1) {
-         teamSelect.selectedIndex = 1; 
-         }
-         
-         // 7. General Fields (Category, Priority, UID, Partial)
-         const cat = getVal(['Category', 'CATEGORY']);
-         if (cat) document.getElementById('create-category').value = cat;
-         
-         const prio = getVal(['Priority', 'PRIORITY']);
-         if (prio) document.getElementById('create-priority').value = prio.charAt(0).toUpperCase() + prio.slice(1).toLowerCase();
-         
-         const uid = getVal(['UID', 'UID (FP)', 'ID']);
-         if (uid) document.getElementById('create-uid').value = uid;
-         
-         // 8. Partial (spinner) - extract number from "Area69" or direct value
-         const partialRaw = getVal(['Partial', 'PARTIAL', 'Area', 'partial']);
-         if (partialRaw) {
-             const partialNum = partialRaw.replace(/\D/g, ''); // strip non-digits
-             const partialSelect = document.getElementById('create-partial');
-             if (partialNum && Array.from(partialSelect.options).some(o => o.value === partialNum)) {
-                 partialSelect.value = partialNum;
+
+             // 2. Technician — FIX1_ID (latest fixer who last touched it: FIX2_ID if present)
+             const techId = getVal('FIX2_ID', 'FIX1_ID', 'Technician ID', 'Tech ID');
+             if (techId) {
+                 const techSelect = document.getElementById('create-tech');
+                 const option = Array.from(techSelect.options).find(o => o.value.startsWith(techId));
+                 if (option) { techSelect.value = option.value; handleTechSelect(techSelect); }
              }
-         } else {
-             // Try to extract area/partial number from the layer name itself (e.g. "Area69" -> but clamp to dropdown range 1-10)
+
+             // 3. RQA Reviewer — RV1_ID
+             const rqaId = getVal('RV1_ID', 'RQA Reviewer');
+             if (rqaId) {
+                 const rqaSelect = document.getElementById('create-rqa-tech');
+                 const opt = Array.from(rqaSelect.options).find(o => o.value === rqaId);
+                 if (opt) rqaSelect.value = rqaId;
+             }
+
+             // 4. Type — RV1_LABEL: I=Incorrect, S=Skip, C=Change
+             const label = getVal('RV1_LABEL', 'Type');
+             if (label) {
+                 const typeMap = { 'I': 'Incorrect', 'S': 'Skip', 'C': 'Change' };
+                 const mapped = typeMap[label.toUpperCase()];
+                 if (mapped) document.querySelector('select[name="type"]').value = mapped;
+             }
+
+             // 5. Dispute Reason — FIX2_NOTES (the dispute comment)
+             const notes = getVal('FIX2_NOTES', 'FIX1_NOTES', 'Reason', 'Dispute Reason');
+             if (notes) {
+                 const reasonField = document.querySelector('#createForm textarea[name="reason"]');
+                 if (reasonField) reasonField.value = notes;
+             }
+
+             // 6. Team — no column in data, auto-select first available team
+             const teamSelect = document.getElementById('create-team');
+             if (teamSelect && !teamSelect.value && teamSelect.options.length > 1) {
+                 teamSelect.selectedIndex = 1;
+             }
+
+             // 7. Category — CATEGORY column
+             const cat = getVal('CATEGORY', 'Category');
+             if (cat) document.getElementById('create-category').value = cat;
+
+             // 8. UID — UID column
+             const uid = getVal('UID', 'UID (FP)', 'ID');
+             if (uid) document.getElementById('create-uid').value = uid;
+
+             // 9. Partial — no dedicated column; extract AreaXX from layer name
+             //    Area number in your data (e.g. Area69) exceeds dropdown range 1-10,
+             //    so highlight the spinner to prompt manual selection
+             const partialEl = document.getElementById('create-partial');
              const areaMatch = rawLayer && rawLayer.match(/Area(\d+)/i);
              if (areaMatch) {
                  const areaNum = areaMatch[1];
-                 const partialSelect = document.getElementById('create-partial');
-                 if (Array.from(partialSelect.options).some(o => o.value === areaNum)) {
-                     partialSelect.value = areaNum;
-                 }
+                 const opt = Array.from(partialEl.options).find(o => o.value === areaNum);
+                 if (opt) partialEl.value = areaNum; // set if in range
              }
-         }
-         
-         // Visual Cue for Partial Selection
-         const partialEl = document.getElementById('create-partial');
-         partialEl.classList.add('highlight-partial');
-         setTimeout(() => partialEl.classList.remove('highlight-partial'), 3500);
-         
-         area.value = ""; 
-         showToast("Smart Extraction Successful!");
+             partialEl.classList.add('highlight-partial');
+             setTimeout(() => partialEl.classList.remove('highlight-partial'), 3500);
+
+             area.value = "";
+             showToast("Smart Extraction Successful!");
          };
          // --- END SMART PASTE LOGIC ---
          
