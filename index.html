@@ -239,7 +239,7 @@
                      <h3 class="text-white font-bold">Smart Extraction</h3>
                      <span class="text-[10px] text-indigo-300 font-medium px-2 py-0.5 bg-indigo-800 rounded-full ml-auto">Copy Initial FixPoints and Paste here</span>
                   </div>
-                  <textarea id="smartPasteArea" oninput="handleSmartPaste()" placeholder="Paste FixPoints here from QGIs" class="w-full bg-indigo-950/50 border border-indigo-500/30 rounded-2xl p-4 text-indigo-100 text-xs outline-none focus:border-indigo-400 transition-all h-20 no-scrollbar"></textarea>
+                  <textarea id="smartPasteArea" onpaste="setTimeout(handleSmartPaste, 0)" placeholder="Paste FixPoints here from QGIs" class="w-full bg-indigo-950/50 border border-indigo-500/30 rounded-2xl p-4 text-indigo-100 text-xs outline-none focus:border-indigo-400 transition-all h-20 no-scrollbar"></textarea>
                </div>
                <form id="createForm" class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
                   <div class="p-6 md:p-10 space-y-6">
@@ -517,12 +517,15 @@
          const exists = Array.from(projSelect.options).some(o => o.value === trimmedName);
          if (exists) {
              projSelect.value = trimmedName;
-             document.getElementById('custom-project-container').classList.add('hidden');
+             handleProjectChange(trimmedName); // triggers Block ID auto-fill from DB
          } else {
              projSelect.value = "__add_new__";
-             document.getElementById('custom-project-container').classList.remove('hidden');
+             handleProjectChange("__add_new__"); // shows custom input, clears block
              document.getElementById('custom-project-name').value = trimmedName;
-             document.getElementById('create-blockId').readOnly = false;
+             // Override block ID from pasted data if available
+             if (blockMatch) {
+                 document.getElementById('create-blockId').value = blockMatch[0];
+             }
          }
          }
          
