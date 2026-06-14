@@ -505,12 +505,14 @@
          }
          
          let trimmedName = rawLayer;
-         const fixIdx = rawLayer.indexOf('Fixpoints');
+         // Case-insensitive search for 'fixpoints'
+         const fixIdx = rawLayer.toLowerCase().indexOf('fixpoints');
          if (fixIdx !== -1) trimmedName = rawLayer.substring(0, fixIdx + 9);
          const underscores = [...rawLayer.matchAll(/_/g)].map(m => m.index);
-         if (underscores.length >= 6) {
-             const sixth = underscores[5];
-             if (fixIdx === -1 || sixth < fixIdx) trimmedName = rawLayer.substring(0, sixth);
+         // Cut at 5th underscore (gives "XXXX_A_B_C_D_E" -> "XXXX_A_B_C_D")
+         if (underscores.length >= 5) {
+             const fifth = underscores[4];
+             if (fixIdx === -1 || fifth < fixIdx) trimmedName = rawLayer.substring(0, fifth);
          }
          
          const projSelect = document.getElementById('create-project');
@@ -576,7 +578,7 @@
          teamSelect.selectedIndex = 1; 
          }
          
-         // 7. General Fields (Category, Priority, UID)
+         // 7. General Fields (Category, Priority, UID, Partial)
          const cat = getVal(['Category', 'CATEGORY']);
          if (cat) document.getElementById('create-category').value = cat;
          
@@ -586,10 +588,30 @@
          const uid = getVal(['UID', 'UID (FP)', 'ID']);
          if (uid) document.getElementById('create-uid').value = uid;
          
+         // 8. Partial (spinner) - extract number from "Area69" or direct value
+         const partialRaw = getVal(['Partial', 'PARTIAL', 'Area', 'partial']);
+         if (partialRaw) {
+             const partialNum = partialRaw.replace(/\D/g, ''); // strip non-digits
+             const partialSelect = document.getElementById('create-partial');
+             if (partialNum && Array.from(partialSelect.options).some(o => o.value === partialNum)) {
+                 partialSelect.value = partialNum;
+             }
+         } else {
+             // Try to extract area/partial number from the layer name itself (e.g. "Area69" -> but clamp to dropdown range 1-10)
+             const areaMatch = rawLayer && rawLayer.match(/Area(\d+)/i);
+             if (areaMatch) {
+                 const areaNum = areaMatch[1];
+                 const partialSelect = document.getElementById('create-partial');
+                 if (Array.from(partialSelect.options).some(o => o.value === areaNum)) {
+                     partialSelect.value = areaNum;
+                 }
+             }
+         }
+         
          // Visual Cue for Partial Selection
-         const partialSelect = document.getElementById('create-partial');
-         partialSelect.classList.add('highlight-partial');
-         setTimeout(() => partialSelect.classList.remove('highlight-partial'), 3500);
+         const partialEl = document.getElementById('create-partial');
+         partialEl.classList.add('highlight-partial');
+         setTimeout(() => partialEl.classList.remove('highlight-partial'), 3500);
          
          area.value = ""; 
          showToast("Smart Extraction Successful!");
