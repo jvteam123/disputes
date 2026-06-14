@@ -810,7 +810,18 @@
          
          window.copyAllDetails = () => {
              const d = window.currentDispute;
-             const text = `PROJECT: ${d.project} (Block ${d.blockId})\nTECH: ${d.techName} (${d.techId})\nCATEGORY: ${d.category} | PARTIAL: ${d.partialSpinner} | TYPE: ${d.type}\nUID: ${d.fpUid}\nRQA: ${d.rqaTechId}\nREASON: ${d.reason}`;
+             const v = (val) => val || "-";
+             const text = [
+                 "PROJECT: " + v(d.project),
+                 "Block: " + v(d.blockId),
+                 "TECH: " + v(d.techName) + " (" + v(d.techId) + ")",
+                 "CATEGORY: " + v(d.category),
+                 "PARTIAL: " + v(d.partialSpinner),
+                 "TYPE: " + v(d.type),
+                 "UID: " + v(d.fpUid),
+                 "RQA: " + v(d.rqaTechId),
+                 "REASON: " + v(d.reason)
+             ].join("\n");
              copyText(text);
          };
          
