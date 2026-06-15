@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MicroAge</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --border: #252a38;
+    --accent: #4f8ef7;
+    --accent-dim: rgba(79, 142, 247, 0.12);
+    --gold: #f0b429;
+    --silver: #a0aec0;
+    --bronze: #cd853f;
+    --text-primary: #e8ecf4;
+    --text-secondary: #7a8499;
+    --text-muted: #4a5266;
+    --rank-bg: #1a1f2e;
+    --hover: #1e2435;
+    --bday-today: rgba(255, 180, 50, 0.08);
+    --bday-soon: rgba(79, 142, 247, 0.06);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+  .header-left h1 span { color: var(--accent); }
+
+  .header-left p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+
+  .notif-btn {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.15s;
+  }
+  .notif-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #f05a5a;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg);
+  }
+
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(79, 247, 140, 0.1);
+    border: 1px solid rgba(79, 247, 140, 0.25);
+    color: #4ff78c;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    background: #4ff78c;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* BIRTHDAY BANNER */
+  #bday-banner {
+    display: none;
+    padding: 0 40px;
+    background: var(--rank-bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .bday-today-section, .bday-soon-section {
+    padding: 14px 0;
+  }
+
+  .bday-today-section + .bday-soon-section {
+    border-top: 1px solid var(--border);
+  }
+
+  .bday-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bday-today-section .bday-section-label { color: var(--gold); }
+  .bday-soon-section .bday-section-label { color: var(--accent); }
+
+  .bday-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .bday-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  .bday-card-today {
+    background: rgba(240, 180, 41, 0.1);
+    border: 1px solid rgba(240, 180, 41, 0.25);
+  }
+
+  .bday-card-soon {
+    background: rgba(79, 142, 247, 0.08);
+    border: 1px solid rgba(79, 142, 247, 0.2);
+  }
+
+  .bday-card-name {
+    font-weight: 600;
+  }
+
+  .bday-card-today .bday-card-name { color: var(--gold); }
+  .bday-card-soon .bday-card-name { color: var(--accent); }
+
+  .bday-card-detail {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .bday-turns {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+
+  .bday-card-today .bday-turns {
+    background: rgba(240, 180, 41, 0.15);
+    color: var(--gold);
+  }
+
+  .bday-card-soon .bday-turns {
+    background: rgba(79, 142, 247, 0.15);
+    color: var(--accent);
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--rank-bg);
+  }
+
+  .stat {
+    flex: 1;
+    padding: 14px 24px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat:last-child { border-right: none; }
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+  }
+
+  /* CONTROLS */
+  .controls {
+    padding: 16px 40px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 320px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 9px 14px 9px 36px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus { border-color: var(--accent); }
+  input[type="text"]::placeholder { color: var(--text-muted); }
+
+  .sort-btns { display: flex; gap: 4px; margin-left: auto; }
+
+  .sort-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .sort-btn:hover, .sort-btn.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .count-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* TABLE */
+  .table-wrap { padding: 0 24px 40px; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding: 14px 16px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 89px;
+    background: var(--bg);
+    z-index: 10;
+  }
+  thead th:last-child { text-align: right; }
+  thead th:first-child { width: 100px; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(37, 42, 56, 0.6);
+    transition: background 0.12s;
+    cursor: default;
+  }
+  tbody tr:hover { background: var(--hover); }
+  tbody tr.bday-today-row { background: var(--bday-today); }
+  tbody tr.bday-today-row:hover { background: rgba(255,180,50,0.13); }
+  tbody tr.bday-soon-row { background: var(--bday-soon); }
+  tbody tr.bday-soon-row:hover { background: rgba(79,142,247,0.1); }
+
+  td {
+    padding: 13px 16px;
+    font-size: 13.5px;
+    vertical-align: middle;
+  }
+
+  .rank-cell {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .rank-icon {
+    width: 26px; height: 26px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rank-num { font-size: 12px; font-weight: 700; min-width: 20px; }
+  .rank-num-1 { color: var(--gold); }
+  .rank-num-2 { color: var(--silver); }
+  .rank-num-3 { color: var(--bronze); }
+  .rank-num-n { color: var(--text-muted); }
+
+  /* tier dots for ranks 4–10 */
+  .tier-pip {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .tier-elite { background: #9b6efc; }
+  .tier-high  { background: #4f8ef7; }
+  .tier-mid   { background: #4a5266; }
+
+  .name-cell { font-weight: 500; color: var(--text-primary); letter-spacing: -0.2px; }
+
+  .name-bday-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .bday-pip {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .bday-countdown {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+  }
+
+  .bday-countdown-today {
+    background: rgba(240,180,41,0.18);
+    color: var(--gold);
+  }
+
+  .bday-countdown-soon {
+    background: rgba(79,142,247,0.15);
+    color: var(--accent);
+  }
+
+  .birth-cell {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .age-cell {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .age-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 13px;
+    min-width: 44px;
+  }
+
+  .age-badge-today {
+    background: rgba(240,180,41,0.15);
+    color: var(--gold);
+  }
+
+  /* TOAST */
+  #toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+
+  .toast {
+    pointer-events: all;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    min-width: 280px;
+    max-width: 340px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    cursor: pointer;
+  }
+
+  .toast.toast-birthday { border-left: 3px solid var(--gold); }
+  .toast.toast-upcoming { border-left: 3px solid var(--accent); }
+  .toast.toast-dismiss { animation: toastOut 0.25s ease forwards; }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(10px); }
+  }
+
+  .toast-icon { font-size: 22px; line-height: 1; flex-shrink: 0; margin-top: 1px; }
+
+  .toast-body { flex: 1; }
+  .toast-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+  .toast-msg { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+  .toast-close {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 2px;
+  }
+  .toast-close:hover { color: var(--text-primary); }
+
+  /* NOTIFICATION PANEL */
+  #notif-panel {
+    display: none;
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    width: 320px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    z-index: 500;
+    overflow: hidden;
+    animation: panelIn 0.2s ease;
+  }
+
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .notif-panel-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .notif-panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .notif-panel-clear {
+    font-size: 11px;
+    color: var(--accent);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .notif-panel-clear:hover { text-decoration: underline; }
+
+  .notif-list { max-height: 360px; overflow-y: auto; }
+
+  .notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(37,42,56,0.6);
+    transition: background 0.1s;
+  }
+  .notif-item:last-child { border-bottom: none; }
+  .notif-item:hover { background: var(--hover); }
+
+  .notif-item-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+  .notif-item-body { flex: 1; }
+  .notif-item-title { font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+  .notif-item-desc { font-size: 11.5px; color: var(--text-secondary); line-height: 1.4; }
+
+  .notif-empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state p { font-size: 14px; margin-top: 8px; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+  }
+  footer span { color: var(--accent); }
+  footer .brand { font-weight: 600; color: var(--text-secondary); }
+
+  @media (max-width: 640px) {
+    header { padding: 20px 16px 16px; }
+    .stats-bar { display: none; }
+    .controls { padding: 12px 16px; }
+    #bday-banner { padding: 0 16px; }
+    .table-wrap { padding: 0 0 32px; }
+    thead th { top: 72px; padding: 10px 10px 8px; }
+    td { padding: 11px 10px; }
+    .birth-cell { display: none; }
+    .sort-btns { display: none; }
+    #toast-container { bottom: 12px; right: 12px; left: 12px; }
+    .toast { min-width: unset; }
+    #notif-panel { right: 8px; left: 8px; width: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Micro<span>Age</span></h1>
+    <p>Ages update automatically every day</p>
+  </div>
+  <div class="header-right">
+    <div class="notif-btn" id="notif-btn" onclick="togglePanel()" title="Birthday notifications">
+      🔔
+      <div class="notif-badge" id="notif-count" style="display:none"></div>
+    </div>
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      Live Ages
+    </div>
+  </div>
+</header>
+
+<!-- BIRTHDAY BANNER -->
+<div id="bday-banner"></div>
+
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-value" id="stat-total">37</div>
+    <div class="stat-label">Total Members</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="stat-avg">—</div>
+    <div class="stat-label">Average Age</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="stat-youngest">—</div>
+    <div class="stat-label">Youngest</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="stat-oldest">—</div>
+    <div class="stat-label">Oldest</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search" placeholder="Search by name…" oninput="filterTable()">
+  </div>
+  <span class="count-label" id="count-label">Showing 37 of 37</span>
+  <div class="sort-btns">
+    <button class="sort-btn active" onclick="sortBy('rank', event)">Rank</button>
+    <button class="sort-btn" onclick="sortBy('name', event)">Name</button>
+    <button class="sort-btn" onclick="sortBy('age', event)">Age</button>
+    <button class="sort-btn" onclick="sortBy('birthdate', event)">Birthdate</button>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table id="main-table">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Name</th>
+        <th>Birthdate</th>
+        <th>Age</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+  <div class="empty-state" id="empty-state" style="display:none;">
+    <div style="font-size:28px">🔍</div>
+    <p>No members found matching your search.</p>
+  </div>
+</div>
+
+<!-- NOTIFICATION PANEL -->
+<div id="notif-panel">
+  <div class="notif-panel-header">
+    <span class="notif-panel-title">🔔 Birthday Notifications</span>
+    <button class="notif-panel-clear" onclick="clearNotifs()">Clear all</button>
+  </div>
+  <div class="notif-list" id="notif-list"></div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<footer>
+  <span class="brand">Micro<span>Age</span></span> &nbsp;·&nbsp; Last computed: <span id="footer-date"></span> &nbsp;·&nbsp; Ages recalculate daily from exact birthdate
+</footer>
+
+<script>
+  const members = [
+    { rank: 1,  name: "Ritche Bayo Cantiveros",      birthdate: "1977-01-11" },
+    { rank: 2,  name: "Christian C. Suico",           birthdate: "1977-03-11" },
+    { rank: 3,  name: "Allan L. Codina",              birthdate: "1983-04-27" },
+    { rank: 4,  name: "Kenneth Lester R. Villajos",   birthdate: "1983-06-10" },
+    { rank: 5,  name: "Anthony Talledo",              birthdate: "1984-10-08" },
+    { rank: 6,  name: "Jeave B. Dela Cerna",          birthdate: "1986-04-13" },
+    { rank: 7,  name: "Villarin Francis Anthony",     birthdate: "1986-10-25" },
+    { rank: 8,  name: "Jacky G. Dimla",               birthdate: "1988-04-27" },
+    { rank: 9,  name: "Nazareno B. Oppus",            birthdate: "1988-08-31" },
+    { rank: 10, name: "Pacifico Tejam Jr.",            birthdate: "1989-05-22" },
+    { rank: 11, name: "Serg M. Sembrano",             birthdate: "1989-08-13" },
+    { rank: 12, name: "Jervin Villocino",             birthdate: "1991-06-24" },
+    { rank: 13, name: "Anderson Tarucan Pogio",       birthdate: "1991-08-21" },
+    { rank: 14, name: "John Vincent Sison",           birthdate: "1990-09-22" },
+    { rank: 15, name: "Michael Bryan R. Lambo",       birthdate: "1991-10-09" },
+    { rank: 16, name: "Christian Pontiano",           birthdate: "1990-12-11" },
+    { rank: 17, name: "Jan Dominic B. Dela Cruz",     birthdate: "1990-12-26" },
+    { rank: 18, name: "Lorens Christopher Ebrado",    birthdate: "1993-01-12" },
+    { rank: 19, name: "Joana May Sanchez",            birthdate: "1992-05-18" },
+    { rank: 20, name: "Jefrey L. Rico",               birthdate: "1992-08-23" },
+    { rank: 21, name: "Jayson C. Aliser",             birthdate: "1993-12-18" },
+    { rank: 22, name: "Sergio Z. Cuizon Jr.",         birthdate: "1994-06-01" },
+    { rank: 23, name: "Rodrigo Basnillo Jr",          birthdate: "1994-10-04" },
+    { rank: 24, name: "Eric Jason Omega",             birthdate: "1994-11-22" },
+    { rank: 25, name: "Arjohn Abapo",                birthdate: "1995-07-08" },
+    { rank: 26, name: "Negel J. Roloma",              birthdate: "1995-08-05" },
+    { rank: 27, name: "Humfrey Dave V. Soroño",       birthdate: "1997-03-18" },
+    { rank: 28, name: "Hyacinth Hortelano",           birthdate: "1997-05-12" },
+    { rank: 29, name: "Mark kg Barong",               birthdate: "1998-06-13" },
+    { rank: 30, name: "Dejie Monterde",               birthdate: "1998-08-11" },
+    { rank: 31, name: "John Cañete",                  birthdate: "1999-01-07" },
+    { rank: 32, name: "Allan Paul Alforque",          birthdate: "1999-03-12" },
+    { rank: 33, name: "Christiane C. Repunte",        birthdate: "1999-08-25" },
+    { rank: 34, name: "Niel Fred A. Tabar",           birthdate: "1999-09-17" },
+    { rank: 35, name: "Jeobenal Parame",              birthdate: "1999-10-08" },
+    { rank: 36, name: "Vince April L. Pitogo",        birthdate: "2000-04-26" },
+    { rank: 37, name: "Arvin O. Jasmin",              birthdate: "2001-08-27" },
+  ];
+
+  // ── BIRTHDAY HELPERS ────────────────────────────────────────────────
+  function calcAge(birthdateStr) {
+    const today = new Date();
+    const birth = new Date(birthdateStr + 'T00:00:00');
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  }
+
+  // Returns days until next birthday (0 = today)
+  function daysUntilBirthday(birthdateStr) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const birth = new Date(birthdateStr + 'T00:00:00');
+    let next = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
+    if (next < today) next.setFullYear(today.getFullYear() + 1);
+    return Math.round((next - today) / 86400000);
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  function ordinal(n) {
+    const s = ['th','st','nd','rd'], v = n % 100;
+    return n + (s[(v-20)%10] || s[v] || s[0]);
+  }
+
+  // ── STATE ────────────────────────────────────────────────────────────
+  let currentSort = 'rank';
+  let currentData = members.map(m => ({
+    ...m,
+    age: calcAge(m.birthdate),
+    daysUntil: daysUntilBirthday(m.birthdate)
+  }));
+
+  const UPCOMING_DAYS = 7;
+  let notifLog = []; // persisted notifications list
+
+  // ── BIRTHDAY BANNER ──────────────────────────────────────────────────
+  function renderBanner() {
+    const todayBdays  = currentData.filter(m => m.daysUntil === 0);
+    const soonBdays   = currentData.filter(m => m.daysUntil > 0 && m.daysUntil <= UPCOMING_DAYS)
+                                   .sort((a,b) => a.daysUntil - b.daysUntil);
+
+    const banner = document.getElementById('bday-banner');
+    if (todayBdays.length === 0 && soonBdays.length === 0) {
+      banner.style.display = 'none';
+      return;
+    }
+
+    banner.style.display = 'block';
+    let html = '';
+
+    if (todayBdays.length > 0) {
+      html += `<div class="bday-today-section">
+        <div class="bday-section-label">🎂 Today's Birthdays</div>
+        <div class="bday-cards">`;
+      todayBdays.forEach(m => {
+        html += `<div class="bday-card bday-card-today">
+          <span class="bday-turns">${ordinal(m.age + 1)}</span>
+          <div>
+            <div class="bday-card-name">${m.name}</div>
+            <div class="bday-card-detail">Turns ${m.age + 1} today 🎉</div>
+          </div>
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    if (soonBdays.length > 0) {
+      html += `<div class="bday-soon-section">
+        <div class="bday-section-label">📅 Coming Up · Next 7 Days</div>
+        <div class="bday-cards">`;
+      soonBdays.forEach(m => {
+        const label = m.daysUntil === 1 ? 'Tomorrow' : `In ${m.daysUntil} days`;
+        html += `<div class="bday-card bday-card-soon">
+          <span class="bday-turns">${label}</span>
+          <div>
+            <div class="bday-card-name">${m.name}</div>
+            <div class="bday-card-detail">Turns ${m.age + 1} · ${formatDate(m.birthdate).split(',')[0]}</div>
+          </div>
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    banner.innerHTML = html;
+  }
+
+  // ── NOTIFICATION PANEL ───────────────────────────────────────────────
+  function buildNotifLog() {
+    notifLog = [];
+    const today  = currentData.filter(m => m.daysUntil === 0);
+    const soon   = currentData.filter(m => m.daysUntil > 0 && m.daysUntil <= UPCOMING_DAYS)
+                               .sort((a,b) => a.daysUntil - b.daysUntil);
+    today.forEach(m => {
+      notifLog.push({ type: 'today', name: m.name, age: m.age + 1, days: 0, date: m.birthdate });
+    });
+    soon.forEach(m => {
+      notifLog.push({ type: 'soon', name: m.name, age: m.age + 1, days: m.daysUntil, date: m.birthdate });
+    });
+  }
+
+  function renderNotifPanel() {
+    const list = document.getElementById('notif-list');
+    const badge = document.getElementById('notif-count');
+
+    if (notifLog.length === 0) {
+      list.innerHTML = '<div class="notif-empty">🎊 No upcoming birthdays in the next 7 days</div>';
+      badge.style.display = 'none';
+      return;
+    }
+
+    badge.style.display = 'flex';
+    badge.textContent = notifLog.length;
+
+    list.innerHTML = notifLog.map(n => {
+      if (n.type === 'today') {
+        return `<div class="notif-item">
+          <div class="notif-item-icon">🎂</div>
+          <div class="notif-item-body">
+            <div class="notif-item-title">${n.name}</div>
+            <div class="notif-item-desc">Celebrates their ${ordinal(n.age)} birthday today! 🎉</div>
+          </div>
+        </div>`;
+      } else {
+        const label = n.days === 1 ? 'tomorrow' : `in ${n.days} days`;
+        return `<div class="notif-item">
+          <div class="notif-item-icon">📅</div>
+          <div class="notif-item-body">
+            <div class="notif-item-title">${n.name}</div>
+            <div class="notif-item-desc">Turns ${n.age} ${label} · ${formatDate(n.date).split(',')[0]}</div>
+          </div>
+        </div>`;
+      }
+    }).join('');
+  }
+
+  function togglePanel() {
+    const panel = document.getElementById('notif-panel');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function clearNotifs() {
+    notifLog = [];
+    renderNotifPanel();
+    document.getElementById('notif-panel').style.display = 'none';
+  }
+
+  // Close panel when clicking outside
+  document.addEventListener('click', e => {
+    const panel = document.getElementById('notif-panel');
+    const btn = document.getElementById('notif-btn');
+    if (panel.style.display === 'block' && !panel.contains(e.target) && !btn.contains(e.target)) {
+      panel.style.display = 'none';
+    }
+  });
+
+  // ── TOAST ─────────────────────────────────────────────────────────────
+  function showToast(icon, title, msg, type) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <div class="toast-icon">${icon}</div>
+      <div class="toast-body">
+        <div class="toast-title">${title}</div>
+        <div class="toast-msg">${msg}</div>
+      </div>
+      <div class="toast-close" onclick="dismissToast(this.parentElement)">✕</div>`;
+    container.appendChild(toast);
+    setTimeout(() => dismissToast(toast), 6000);
+  }
+
+  function dismissToast(el) {
+    if (!el || !el.parentElement) return;
+    el.classList.add('toast-dismiss');
+    setTimeout(() => el.remove(), 260);
+  }
+
+  function showBirthdayToasts() {
+    const today = currentData.filter(m => m.daysUntil === 0);
+    const tomorrow = currentData.filter(m => m.daysUntil === 1);
+
+    today.forEach((m, i) => {
+      setTimeout(() => {
+        showToast('🎂', 'Happy Birthday!', `${m.name} turns ${m.age + 1} today! 🎉`, 'birthday');
+      }, i * 700);
+    });
+
+    if (today.length === 0) {
+      tomorrow.forEach((m, i) => {
+        setTimeout(() => {
+          showToast('📅', 'Birthday Tomorrow', `${m.name} turns ${m.age + 1} tomorrow!`, 'upcoming');
+        }, i * 700);
+      });
+    }
+  }
+
+  // ── BROWSER PUSH NOTIFICATIONS ────────────────────────────────────────
+  function requestAndNotify() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted') {
+      sendPushNotifications();
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(p => {
+        if (p === 'granted') sendPushNotifications();
+      });
+    }
+  }
+
+  function sendPushNotifications() {
+    const today = currentData.filter(m => m.daysUntil === 0);
+    today.forEach(m => {
+      new Notification(`🎂 Happy Birthday, ${m.name.split(' ')[0]}!`, {
+        body: `Celebrates their ${ordinal(m.age + 1)} birthday today!`,
+        icon: 'https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15/img/apple/64/1f382.png'
+      });
+    });
+  }
+
+  // ── TABLE RENDER ──────────────────────────────────────────────────────
+  function sortBy(key, e) {
+    currentSort = key;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    if (e && e.target) e.target.classList.add('active');
+    renderTable();
+  }
+
+  function filterTable() { renderTable(); }
+
+  function renderTable() {
+    const query = document.getElementById('search').value.toLowerCase();
+    let data = currentData.filter(m => m.name.toLowerCase().includes(query));
+
+    if (currentSort === 'rank') data.sort((a,b) => a.rank - b.rank);
+    else if (currentSort === 'name') data.sort((a,b) => a.name.localeCompare(b.name));
+    else if (currentSort === 'age') data.sort((a,b) => b.age - a.age);
+    else if (currentSort === 'birthdate') data.sort((a,b) => new Date(a.birthdate) - new Date(b.birthdate));
+
+    const tbody = document.getElementById('table-body');
+    const empty = document.getElementById('empty-state');
+    const table = document.getElementById('main-table');
+
+    if (data.length === 0) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      table.style.display = 'none';
+    } else {
+      empty.style.display = 'none';
+      table.style.display = '';
+
+      tbody.innerHTML = data.map(m => {
+        // Build rank icon SVG
+        function rankIcon(rank) {
+          if (rank === 1) return `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 3L15.5 9.5H22.5L16.8 13.8L19 20.5L13 16.5L7 20.5L9.2 13.8L3.5 9.5H10.5L13 3Z" fill="#f0b429" opacity="0.9"/>
+            <circle cx="13" cy="13" r="12" stroke="#f0b429" stroke-width="1" stroke-opacity="0.3" fill="none"/>
+          </svg>`;
+          if (rank === 2) return `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 3L15.5 9.5H22.5L16.8 13.8L19 20.5L13 16.5L7 20.5L9.2 13.8L3.5 9.5H10.5L13 3Z" fill="#a0aec0" opacity="0.85"/>
+            <circle cx="13" cy="13" r="12" stroke="#a0aec0" stroke-width="1" stroke-opacity="0.3" fill="none"/>
+          </svg>`;
+          if (rank === 3) return `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 3L15.5 9.5H22.5L16.8 13.8L19 20.5L13 16.5L7 20.5L9.2 13.8L3.5 9.5H10.5L13 3Z" fill="#cd853f" opacity="0.85"/>
+            <circle cx="13" cy="13" r="12" stroke="#cd853f" stroke-width="1" stroke-opacity="0.3" fill="none"/>
+          </svg>`;
+          // Rank 4–10: shield icon
+          if (rank <= 10) return `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 2L4 5V11C4 14.9 7.1 18.5 11 19.5C14.9 18.5 18 14.9 18 11V5L11 2Z" fill="${rank <= 6 ? '#9b6efc' : '#4f8ef7'}" fill-opacity="0.18" stroke="${rank <= 6 ? '#9b6efc' : '#4f8ef7'}" stroke-width="1.2" stroke-opacity="0.6"/>
+          </svg>`;
+          // Rank 11–20: diamond
+          if (rank <= 20) return `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2L18 10L10 18L2 10L10 2Z" fill="#4f8ef7" fill-opacity="0.1" stroke="#4f8ef7" stroke-width="1.2" stroke-opacity="0.4"/>
+          </svg>`;
+          // Rank 21+: circle
+          return `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="9" cy="9" r="7.5" fill="none" stroke="#4a5266" stroke-width="1.2"/>
+          </svg>`;
+        }
+
+        let numClass = 'rank-num-n';
+        if (m.rank === 1) numClass = 'rank-num-1';
+        else if (m.rank === 2) numClass = 'rank-num-2';
+        else if (m.rank === 3) numClass = 'rank-num-3';
+
+        let rowClass = '';
+        let nameExtra = '';
+        let ageBadgeExtra = '';
+
+        if (m.daysUntil === 0) {
+          rowClass = 'bday-today-row';
+          nameExtra = `<span class="bday-pip">🎂</span><span class="bday-countdown bday-countdown-today">TODAY</span>`;
+          ageBadgeExtra = 'age-badge-today';
+        } else if (m.daysUntil <= UPCOMING_DAYS) {
+          rowClass = 'bday-soon-row';
+          const cd = m.daysUntil === 1 ? 'TOMORROW' : `${m.daysUntil}d`;
+          nameExtra = `<span class="bday-pip">📅</span><span class="bday-countdown bday-countdown-soon">${cd}</span>`;
+        }
+
+        return `<tr class="${rowClass}">
+          <td><div class="rank-cell"><div class="rank-icon">${rankIcon(m.rank)}</div><span class="rank-num ${numClass}">${m.rank}</span></div></td>
+          <td class="name-cell">
+            <div class="name-bday-indicator">
+              ${m.name}${nameExtra ? '&nbsp;&nbsp;' + nameExtra : ''}
+            </div>
+          </td>
+          <td class="birth-cell">${formatDate(m.birthdate)}</td>
+          <td class="age-cell"><span class="age-badge ${ageBadgeExtra}">${m.daysUntil === 0 ? m.age + 1 : m.age}</span></td>
+        </tr>`;
+      }).join('');
+    }
+
+    document.getElementById('count-label').textContent =
+      `Showing ${data.length} of ${currentData.length}`;
+  }
+
+  // ── STATS ─────────────────────────────────────────────────────────────
+  function updateStats() {
+    const ages = currentData.map(m => m.age);
+    const avg = (ages.reduce((a,b) => a+b, 0) / ages.length).toFixed(1);
+    document.getElementById('stat-total').textContent = currentData.length;
+    document.getElementById('stat-avg').textContent = avg;
+    document.getElementById('stat-youngest').textContent = Math.min(...ages);
+    document.getElementById('stat-oldest').textContent = Math.max(...ages);
+  }
+
+  function updateFooter() {
+    const now = new Date();
+    document.getElementById('footer-date').textContent =
+      now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  // ── MIDNIGHT REFRESH ──────────────────────────────────────────────────
+  function scheduleRefresh() {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    setTimeout(() => {
+      currentData = members.map(m => ({
+        ...m,
+        age: calcAge(m.birthdate),
+        daysUntil: daysUntilBirthday(m.birthdate)
+      }));
+      updateStats();
+      updateFooter();
+      buildNotifLog();
+      renderBanner();
+      renderNotifPanel();
+      renderTable();
+      showBirthdayToasts();
+      scheduleRefresh();
+    }, midnight - now);
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────────────
+  updateStats();
+  updateFooter();
+  buildNotifLog();
+  renderBanner();
+  renderNotifPanel();
+  renderTable();
+
+  // Show toasts after brief delay so page loads first
+  setTimeout(() => {
+    showBirthdayToasts();
+    requestAndNotify();
+  }, 1200);
+
+  scheduleRefresh();
+</script>
+</body>
+</html>
