@@ -319,6 +319,10 @@
                            </select>
                         </div>
                         <div>
+                           <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Warning</label>
+                           <input type="text" name="warning" id="create-warning" placeholder="e.g. D, W1..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                        </div>
+                        <div>
                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">RQA Reviewer</label>
                            <select name="rqaTechId" id="create-rqa-tech" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
                         </div>
@@ -548,15 +552,27 @@
                  if (opt) rqaSelect.value = rqaId;
              }
 
-             // 4. Type — RV1_LABEL: I=Incorrect, S=Skip, C=Change
-             const label = getVal('RV1_LABEL', 'Type');
-             if (label) {
-                 const typeMap = { 'I': 'Incorrect', 'S': 'Skip', 'C': 'Change' };
-                 const mapped = typeMap[label.toUpperCase()];
+             // 4. Type — use RV1_LABEL if RV2_LABEL and RV3_LABEL are both empty, else use latest round
+             const typeMap = { 'I': 'Incorrect', 'S': 'Skip', 'C': 'Change' };
+             const rv1 = getVal('RV1_LABEL');
+             const rv2 = getVal('RV2_LABEL');
+             const rv3 = getVal('RV3_LABEL');
+             const activeLabel = rv3 || rv2 || rv1; // latest non-empty round wins
+             if (activeLabel) {
+                 const mapped = typeMap[activeLabel.toUpperCase()];
                  if (mapped) document.querySelector('select[name="type"]').value = mapped;
              }
 
-             // 5. Dispute Reason — FIX2_NOTES (the dispute comment)
+             // 5. Warning — R1_WARN / R2_WARN / R3_WARN, same logic as Type
+             const w1 = getVal('R1_WARN');
+             const w2 = getVal('R2_WARN');
+             const w3 = getVal('R3_WARN');
+             const activeWarn = w3 || w2 || w1;
+             if (activeWarn) {
+                 document.getElementById('create-warning').value = activeWarn.trim();
+             }
+
+             // 6. Dispute Reason — FIX2_NOTES (the dispute comment)
              const notes = getVal('FIX2_NOTES', 'FIX1_NOTES', 'Reason', 'Dispute Reason');
              if (notes) {
                  const reasonField = document.querySelector('#createForm textarea[name="reason"]');
@@ -674,6 +690,7 @@
                      ${detailRow('Partial', d.partialSpinner, `Partial ${d.partialSpinner}`)}
                      ${detailRow('Category', d.category)}
                      ${detailRow('Classification Type', d.type)}
+                    ${d.warning ? detailRow('Warning', d.warning) : ''}
                      ${detailRow('Team Name', d.team)}
                      ${detailRow('RQA Reviewer ID', d.rqaTechId)}
                      <div class="md:col-span-2">
@@ -820,7 +837,8 @@
                  "TYPE: " + v(d.type),
                  "UID: " + v(d.fpUid),
                  "RQA: " + v(d.rqaTechId),
-                 "REASON: " + v(d.reason)
+                 "WARNING: " + v(d.warning),
+                "REASON: " + v(d.reason)
              ].join("\n");
              copyText(text);
          };
