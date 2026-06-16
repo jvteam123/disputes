@@ -385,24 +385,6 @@
   .tier-mid   { background: #4a5266; }
 
 
-  .id-cell {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-  }
-
-  .id-badge {
-    background: var(--rank-bg);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 2px 7px;
-    font-size: 10.5px;
-    color: var(--text-secondary);
-    letter-spacing: 0.8px;
-  }
   .name-cell { font-weight: 500; color: var(--text-primary); letter-spacing: -0.2px; }
 
   .name-bday-indicator {
@@ -687,7 +669,6 @@
     <thead>
       <tr>
         <th>Rank</th>
-        <th>ID</th>
         <th>Name</th>
         <th>Birthdate</th>
         <th>Age</th>
@@ -719,56 +700,56 @@
 
 <script>
   const members = [
-    { rank: 1,  id: "",       name: "Ritche Bayo Cantiveros",      birthdate: "1977-01-11" },
-    { rank: 2,  id: "",       name: "Christian C. Suico",           birthdate: "1977-03-11" },
-    { rank: 3,  id: "",       name: "Allan L. Codina",              birthdate: "1983-04-27" },
-    { rank: 4,  id: "",       name: "Kenneth Lester R. Villajos",   birthdate: "1983-06-10" },
-    { rank: 5,  id: "",       name: "Anthony Talledo",              birthdate: "1984-10-08" },
-    { rank: 6,  id: "",       name: "Jeave B. Dela Cerna",          birthdate: "1986-04-13" },
-    { rank: 7,  id: "",       name: "Villarin Francis Anthony",     birthdate: "1986-10-25" },
-    { rank: 8,  id: "",       name: "Jacky G. Dimla",               birthdate: "1988-04-27" },
-    { rank: 9,  id: "",       name: "Nazareno B. Oppus",            birthdate: "1988-08-31" },
-    { rank: 10, id: "",       name: "Pacifico Tejam Jr.",            birthdate: "1989-05-22" },
-    { rank: 11, id: "",       name: "Serg M. Sembrano",             birthdate: "1989-08-13" },
-    { rank: 12, id: "",       name: "Jervin Villocino",             birthdate: "1991-06-24" },
-    { rank: 13, id: "",       name: "Anderson Tarucan Pogio",       birthdate: "1991-08-21" },
-    { rank: 14, id: "",       name: "John Vincent Sison",           birthdate: "1990-09-22" },
-    { rank: 15, id: "",       name: "Michael Bryan R. Lambo",       birthdate: "1991-10-09" },
-    { rank: 16, id: "",       name: "Christian Pontiano",           birthdate: "1990-12-11" },
-    { rank: 17, id: "",       name: "Jan Dominic B. Dela Cruz",     birthdate: "1990-12-26" },
-    { rank: 18, id: "",       name: "Lorens Christopher Ebrado",    birthdate: "1993-01-12" },
-    { rank: 19, id: "",       name: "Joana May Sanchez",            birthdate: "1992-05-18" },
-    { rank: 20, id: "",       name: "Jefrey L. Rico",               birthdate: "1992-08-23" },
-    { rank: 21, id: "",       name: "Jayson C. Aliser",             birthdate: "1993-12-18" },
-    { rank: 22, id: "",       name: "Sergio Z. Cuizon Jr.",         birthdate: "1994-06-01" },
-    { rank: 23, id: "",       name: "Rodrigo Basnillo Jr",          birthdate: "1994-10-04" },
-    { rank: 24, id: "",       name: "Eric Jason Omega",             birthdate: "1994-11-22" },
-    { rank: 25, id: "",       name: "Arjohn Abapo",                birthdate: "1995-07-08" },
-    { rank: 26, id: "",       name: "Negel J. Roloma",              birthdate: "1995-08-05" },
-    { rank: 27, id: "",       name: "Humfrey Dave V. Soroño",       birthdate: "1997-03-18" },
-    { rank: 28, id: "",       name: "Hyacinth Hortelano",           birthdate: "1997-05-12" },
-    { rank: 29, id: "",       name: "Mark kg Barong",               birthdate: "1998-06-13" },
-    { rank: 30, id: "",       name: "Dejie Monterde",               birthdate: "1998-08-11" },
-    { rank: 31, id: "",       name: "John Cañete",                  birthdate: "1999-01-07" },
-    { rank: 32, id: "",       name: "Allan Paul Alforque",          birthdate: "1999-03-12" },
-    { rank: 33, id: "",       name: "Christiane C. Repunte",        birthdate: "1999-08-25" },
-    { rank: 34, id: "",       name: "Niel Fred A. Tabar",           birthdate: "1999-09-17" },
-    { rank: 35, id: "",       name: "Jeobenal Parame",              birthdate: "1999-10-08" },
-    { rank: 36, id: "",       name: "Vince April L. Pitogo",        birthdate: "2000-04-26" },
-    { rank: 37, id: "",       name: "Arvin O. Jasmin",              birthdate: "2001-08-27" },
-    { rank: 38, id: "7799JM", name: "Malinas I Jr",                 birthdate: "1988-08-04" },
-    { rank: 39, id: "7796GL", name: "Laput, Gemar Del Mar",           birthdate: "1990-08-14" },
-    { rank: 40, id: "7809RR", name: "Rodriguez, Raquel Alegre M.",    birthdate: "1991-09-16" },
-    { rank: 41, id: "7789ME", name: "Edoloverio, Marjhon O.",         birthdate: "1995-09-14" },
-    { rank: 42, id: "7795AJ", name: "Adrian O. Jasmin",               birthdate: "1996-11-15" },
-    { rank: 43, id: "7779AA", name: "Abella, Abegail D.",             birthdate: "1998-05-13" },
-    { rank: 44, id: "7787TC", name: "Cuizon Jr., Timotio",            birthdate: "1999-12-01" },
-    { rank: 45, id: "7780NA", name: "Aguhar, Niña Mae E.",            birthdate: "2000-01-14" },
-    { rank: 46, id: "7810JS", name: "Siodina, Jason Kim P.",          birthdate: "2002-04-25" },
-    { rank: 47, id: "7783AB", name: "Beatingo, Angielyn Angel B.",    birthdate: "2002-11-11" },
-    { rank: 48, id: "7802NM", name: "Nikki Eleazar M. Morales",       birthdate: "2002-07-18" },
-    { rank: 49, id: "7794JJ", name: "Jaralve, Josh C.",               birthdate: "2003-12-28" },
-    { rank: 50, id: "7804GP", name: "Parame, Gian Carlo",             birthdate: "2004-08-20" },
+    { rank: 1, name: "Ritche Bayo Cantiveros",      birthdate: "1977-01-11" },
+    { rank: 2, name: "Christian C. Suico",           birthdate: "1977-03-11" },
+    { rank: 3, name: "Allan L. Codina",              birthdate: "1983-04-27" },
+    { rank: 4, name: "Kenneth Lester R. Villajos",   birthdate: "1983-06-10" },
+    { rank: 5, name: "Anthony Talledo",              birthdate: "1984-10-08" },
+    { rank: 6, name: "Jeave B. Dela Cerna",          birthdate: "1986-04-13" },
+    { rank: 7, name: "Villarin Francis Anthony",     birthdate: "1986-10-25" },
+    { rank: 8, name: "Jacky G. Dimla",               birthdate: "1988-04-27" },
+    { rank: 9, name: "Nazareno B. Oppus",            birthdate: "1988-08-31" },
+    { rank: 10, name: "Pacifico Tejam Jr.",            birthdate: "1989-05-22" },
+    { rank: 11, name: "Serg M. Sembrano",             birthdate: "1989-08-13" },
+    { rank: 12, name: "Jervin Villocino",             birthdate: "1991-06-24" },
+    { rank: 13, name: "Anderson Tarucan Pogio",       birthdate: "1991-08-21" },
+    { rank: 14, name: "John Vincent Sison",           birthdate: "1990-09-22" },
+    { rank: 15, name: "Michael Bryan R. Lambo",       birthdate: "1991-10-09" },
+    { rank: 16, name: "Christian Pontiano",           birthdate: "1990-12-11" },
+    { rank: 17, name: "Jan Dominic B. Dela Cruz",     birthdate: "1990-12-26" },
+    { rank: 18, name: "Lorens Christopher Ebrado",    birthdate: "1993-01-12" },
+    { rank: 19, name: "Joana May Sanchez",            birthdate: "1992-05-18" },
+    { rank: 20, name: "Jefrey L. Rico",               birthdate: "1992-08-23" },
+    { rank: 21, name: "Jayson C. Aliser",             birthdate: "1993-12-18" },
+    { rank: 22, name: "Sergio Z. Cuizon Jr.",         birthdate: "1994-06-01" },
+    { rank: 23, name: "Rodrigo Basnillo Jr",          birthdate: "1994-10-04" },
+    { rank: 24, name: "Eric Jason Omega",             birthdate: "1994-11-22" },
+    { rank: 25, name: "Arjohn Abapo",                birthdate: "1995-07-08" },
+    { rank: 26, name: "Negel J. Roloma",              birthdate: "1995-08-05" },
+    { rank: 27, name: "Humfrey Dave V. Soroño",       birthdate: "1997-03-18" },
+    { rank: 28, name: "Hyacinth Hortelano",           birthdate: "1997-05-12" },
+    { rank: 29, name: "Mark kg Barong",               birthdate: "1998-06-13" },
+    { rank: 30, name: "Dejie Monterde",               birthdate: "1998-08-11" },
+    { rank: 31, name: "John Cañete",                  birthdate: "1999-01-07" },
+    { rank: 32, name: "Allan Paul Alforque",          birthdate: "1999-03-12" },
+    { rank: 33, name: "Christiane C. Repunte",        birthdate: "1999-08-25" },
+    { rank: 34, name: "Niel Fred A. Tabar",           birthdate: "1999-09-17" },
+    { rank: 35, name: "Jeobenal Parame",              birthdate: "1999-10-08" },
+    { rank: 36, name: "Vince April L. Pitogo",        birthdate: "2000-04-26" },
+    { rank: 37, name: "Arvin O. Jasmin",              birthdate: "2001-08-27" },
+    { rank: 38, name: "Malinas I Jr",                 birthdate: "1988-08-04" },
+    { rank: 39, name: "Laput, Gemar Del Mar",           birthdate: "1990-08-14" },
+    { rank: 40, name: "Rodriguez, Raquel Alegre M.",    birthdate: "1991-09-16" },
+    { rank: 41, name: "Edoloverio, Marjhon O.",         birthdate: "1995-09-14" },
+    { rank: 42, name: "Adrian O. Jasmin",               birthdate: "1996-11-15" },
+    { rank: 43, name: "Abella, Abegail D.",             birthdate: "1998-05-13" },
+    { rank: 44, name: "Cuizon Jr., Timotio",            birthdate: "1999-12-01" },
+    { rank: 45, name: "Aguhar, Niña Mae E.",            birthdate: "2000-01-14" },
+    { rank: 46, name: "Siodina, Jason Kim P.",          birthdate: "2002-04-25" },
+    { rank: 47, name: "Beatingo, Angielyn Angel B.",    birthdate: "2002-11-11" },
+    { rank: 48, name: "Nikki Eleazar M. Morales",       birthdate: "2002-07-18" },
+    { rank: 49, name: "Jaralve, Josh C.",               birthdate: "2003-12-28" },
+    { rank: 50, name: "Parame, Gian Carlo",             birthdate: "2004-08-20" },
   ];
 
   // ── BIRTHDAY HELPERS ────────────────────────────────────────────────
@@ -1076,7 +1057,6 @@
 
         return `<tr class="${rowClass}">
           <td><div class="rank-cell"><div class="rank-icon">${rankIcon(m.rank)}</div><span class="rank-num ${numClass}">${m.rank}</span></div></td>
-          <td class="id-cell">${m.id ? '<span class="id-badge">' + m.id + '</span>' : ''}</td>
           <td class="name-cell">
             <div class="name-bday-indicator">
               ${m.name}${nameExtra ? '&nbsp;&nbsp;' + nameExtra : ''}
